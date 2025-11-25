@@ -8,9 +8,7 @@ import multiprocess as mp
 binary_df_math500 = pd.read_csv('correctness_matrix_math500.csv', index_col=0)
 cot_df_math500 = pd.read_csv('cot_length_matrix_math500.csv', index_col=0)
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from cMIRT_EM_c import cMIRT_SAEM_full, MIRT_SAEM_full
+from ..LaRT import LaRT_SAEM_full, IRT_SAEM_full
 
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
@@ -53,26 +51,26 @@ chosen_models_bool[chosen_models] = True
 if __name__ == "__main__":
     # Create a pool with 2 processes to run both models at the same time
     with mp.Pool(processes=2) as pool:
-        print("Starting cMIRT and MIRT model fitting in parallel...")
+        print("Starting LaRT and IRT model fitting in parallel...")
 
-        # 1. Submit the first task (cMIRT) to the pool
-        cmirt_result_async = pool.apply_async(
-            cMIRT_SAEM_full,
+        # 1. Submit the first task (LaRT) to the pool
+        LaRT_result_async = pool.apply_async(
+            LaRT_SAEM_full,
             args=(binary_array[chosen_models_bool, :], cot_array[chosen_models_bool, :]),
             kwds={'n_samples': 1, 'seed': 42}
         )
 
-        # 2. Submit the second task (MIRT) to the pool
-        mirt_result_async = pool.apply_async(
-            MIRT_SAEM_full,
+        # 2. Submit the second task (IRT) to the pool
+        IRT_result_async = pool.apply_async(
+            IRT_SAEM_full,
             args=(binary_array[chosen_models_bool, :],),
             kwds={'n_samples': 1, 'seed': 42}
         )
 
         # 3. Wait for the results from both tasks
         print("Waiting for results...")
-        theta_joint, tau_joint, a_joint, b_joint, omega_joint, phi_joint, lam_joint, rho_joint, n_iter_joint = cmirt_result_async.get()
-        theta_irt, a_irt, b_irt, sigma2_irt, n_iter_irt = mirt_result_async.get()
+        theta_joint, tau_joint, a_joint, b_joint, omega_joint, phi_joint, lam_joint, rho_joint, n_iter_joint = LaRT_result_async.get()
+        theta_irt, a_irt, b_irt, n_iter_irt = IRT_result_async.get()
 
     print("Model fitting complete. Saving results...")
 
@@ -91,7 +89,6 @@ if __name__ == "__main__":
         'theta_irt': [theta_irt],
         'a_irt': [a_irt],
         'b_irt': [b_irt],
-        'sigma2_irt': [sigma2_irt],
         'n_iter_joint': n_iter_joint,
         'n_iter_irt': n_iter_irt
     })

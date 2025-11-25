@@ -6,11 +6,10 @@ import multiprocess as mp
 from tqdm import tqdm
 import itertools
 
-binary_df_math500 = pd.read_csv('correctness_matrix_math500.csv', index_col=0)
-cot_df_math500 = pd.read_csv('cot_length_matrix_math500.csv', index_col=0)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+binary_df_math500 = pd.read_csv('../data/accuracy_math500.csv', index_col=0)
+cot_df_math500 = pd.read_csv('../data/cot_length_math500.csv', index_col=0)
 
-from cMIRT_EM_c import cMIRT_SAEM_full, MIRT_SAEM_full
+from ..LaRT import LaRT_SAEM_full, IRT_SAEM_full
 
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
@@ -59,28 +58,28 @@ def run_model(task_info):
     model_type, i = task_info
     print(f"Starting task: {model_type} on subarray {i+1}/{num_subarrays}...")
 
-    if model_type == 'cMIRT':
-        theta, tau, a, b, omega, phi, lam, rho, n_iter = cMIRT_SAEM_full(
+    if model_type == 'LaRT':
+        theta, tau, a, b, omega, phi, lam, rho, n_iter = LaRT_SAEM_full(
             binary_subarrays[i], cot_subarrays[i], n_samples=1, seed=42
         )
         return {
-            'model_type': 'cMIRT', 'subarray': i, 'theta_joint': theta, 'tau_joint': tau, 
+            'model_type': 'LaRT', 'subarray': i, 'theta_joint': theta, 'tau_joint': tau, 
             'a_joint': a, 'b_joint': b, 'omega_joint': omega, 'phi_joint': phi, 
             'lam_joint': lam, 'rho_joint': rho, 'n_iter_joint': n_iter
         }
-    elif model_type == 'MIRT':
-        theta, a, b, sigma2, n_iter = MIRT_SAEM_full(
+    elif model_type == 'IRT':
+        theta, a, b, n_iter = IRT_SAEM_full(
             binary_subarrays[i], n_samples=1, seed=42
         )
         return {
-            'model_type': 'MIRT', 'subarray': i, 'theta_irt': theta, 'a_irt': a, 
-            'b_irt': b, 'sigma2_irt': sigma2, 'n_iter_irt': n_iter
+            'model_type': 'IRT', 'subarray': i, 'theta_irt': theta, 'a_irt': a, 
+            'b_irt': b, 'n_iter_irt': n_iter
         }
 
 # --- 2. Main Execution Block ---
 if __name__ == "__main__":
     # Create a flat list of all 10 tasks to run
-    model_types = ['cMIRT', 'MIRT']
+    model_types = ['LaRT', 'IRT']
     tasks = list(itertools.product(model_types, range(num_subarrays)))
     
     # We can use more processes now, up to the number of tasks or CPU cores
@@ -94,9 +93,9 @@ if __name__ == "__main__":
     joint_results = []
     irt_results = []
     for res in results:
-        if res['model_type'] == 'cMIRT':
+        if res['model_type'] == 'LaRT':
             joint_results.append(res)
-        elif res['model_type'] == 'MIRT':
+        elif res['model_type'] == 'IRT':
             irt_results.append(res)
 
     # Sort results by subarray index to maintain order
