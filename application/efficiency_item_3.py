@@ -182,4 +182,4 @@ if __name__ == "__main__":
     theta_IRT=theta_IRT
     )
 
-    print("Results saved to 'efficiency_item_rest3.npz'")
+    print("Results saved to 'efficiency_item_parest3.npz'")
