@@ -1,8 +1,9 @@
 # Real-data applications
 
 These programs reproduce the Section 7 model fits in the
-[LaRT paper](https://arxiv.org/abs/2512.07019). Install the package first. Only inputs under
-`data/benchmarks/` are versioned; generated fits are written under ignored `results/applications/`.
+[LaRT paper](https://arxiv.org/abs/2512.07019). Install the package first. Benchmark inputs are
+under `data/benchmarks/`, and the exact post-processed paper data are under `data/processed/`.
+Newly generated fits are written under ignored `results/applications/`.
 
 | Paper analysis | Program | Dataset |
 |---|---|---|

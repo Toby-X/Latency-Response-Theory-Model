@@ -339,14 +339,72 @@ def check_previous_comparison(working_dir: Path | None) -> str:
 
 
 def check_data_artifacts() -> str:
-    csv_count = 0
-    for path in (ROOT / "data" / "benchmarks").rglob("*.csv"):
+    csv_count = parquet_count = npz_count = npy_count = 0
+    for path in (ROOT / "data").rglob("*.csv"):
         pd.read_csv(path, index_col=0)
         csv_count += 1
-    for removed in (ROOT / "data" / "processed", ROOT / "results"):
-        if removed.exists():
-            raise AssertionError(f"committed output directory still exists: {removed}")
-    return f"read {csv_count} benchmark CSV files; no saved-fit/output directories present"
+    for path in (ROOT / "data").rglob("*.parquet"):
+        pd.read_parquet(path)
+        parquet_count += 1
+    for path in (ROOT / "data").rglob("*.npz"):
+        with np.load(path) as archive:
+            for name in archive.files:
+                np.asarray(archive[name])
+        npz_count += 1
+    for path in (ROOT / "data").rglob("*.npy"):
+        np.load(path)
+        npy_count += 1
+    if (ROOT / "results").exists():
+        raise AssertionError("generated experiment-output directory is committed or present")
+    return (
+        f"read {csv_count} CSV, {parquet_count} Parquet, {npz_count} NPZ, "
+        f"and {npy_count} NPY data files"
+    )
+
+
+def check_paper_application_artifacts() -> str:
+    """Verify that retained post-processed data reproduce reported paper values."""
+    processed = ROOT / "data" / "processed"
+    sensitivity = pd.read_parquet(processed / "sensitivity_math500.parquet")
+    ground_truth = pd.read_parquet(processed / "estimated_parameters_math500_all.parquet")
+    questions = np.load(processed / "question_list.npy")
+    if sensitivity["N"].tolist() != [50, 75, 100, 125]:
+        raise AssertionError("LLM-efficiency data contain a sample size not shown in Table 2")
+
+    expected = {
+        ("a", "irt"): [28.8248, 5.5137, 0.9078, 0.6288],
+        ("a", "joint"): [3.8537, 5.6749, 0.8896, 0.5825],
+        ("b", "irt"): [18.5782, 2.7583, 0.7409, 0.7464],
+        ("b", "joint"): [2.3181, 3.0197, 0.7105, 0.7010],
+    }
+    for (parameter, model), target in expected.items():
+        truth = np.asarray(ground_truth[f"{parameter}_{model}"].iloc[0])[questions]
+        observed = [
+            np.sqrt(np.mean((np.asarray(value)[0] - truth) ** 2))
+            for value in sensitivity[f"{parameter}_{model}"]
+        ]
+        if not np.allclose(observed, target, atol=5e-5):
+            raise AssertionError(((parameter, model), observed, target))
+
+    joint = pd.read_parquet(
+        processed / "estimated_parameters_joint_validity_math500.parquet"
+    )
+    irt = pd.read_parquet(processed / "estimated_parameters_irt_validity_math500.parquet")
+    joint_variance = float(np.sum(np.var(joint["theta_joint"].to_numpy())))
+    irt_variance = float(np.sum(np.var(irt["theta_irt"].to_numpy())))
+    if not np.allclose([joint_variance, irt_variance], [2.01315357, 2.34234454]):
+        raise AssertionError((joint_variance, irt_variance))
+
+    with np.load(processed / "rest3_pred_params.npz") as prediction:
+        if prediction["a_lart_train"].shape != (100,):
+            raise AssertionError("predictive fit is not the paper's 100-item fit")
+    predictive_scores = pd.read_csv(processed / "predictive_power_mae.csv")
+    expected_scores = np.array(
+        [[0.235, 0.391], [0.177, 0.190], [0.183, 0.268], [0.160, 0.257], [0.161, 0.238]]
+    )
+    if not np.allclose(predictive_scores[["lart_mae", "irt_mae"]], expected_scores):
+        raise AssertionError("predictive scores do not match Table 1")
+    return "post-processed application data reproduce Tables 1-2 and validity variances"
 
 
 def main() -> None:
@@ -424,7 +482,12 @@ def main() -> None:
                 "validation/compare_working_folder.py",
                 lambda: check_previous_comparison(args.working_dir),
             ),
-            ("data-artifacts", "data/benchmarks/", check_data_artifacts),
+            ("data-artifacts", "data/", check_data_artifacts),
+            (
+                "paper-application-artifacts",
+                "data/processed/",
+                check_paper_application_artifacts,
+            ),
         ]
     )
 

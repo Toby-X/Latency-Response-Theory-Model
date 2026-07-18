@@ -1,8 +1,8 @@
 # Data
 
-This directory contains the post-processed benchmark inputs used in the
-[LaRT paper](https://arxiv.org/abs/2512.07019). It contains neither saved model fits nor the much
-larger raw model generations.
+This directory contains the benchmark matrices and post-processed application data used in the
+[LaRT paper](https://arxiv.org/abs/2512.07019). It does not contain the much larger raw model
+generations or the full Monte Carlo experiment outputs.
 
 ## Benchmark matrices
 
@@ -19,6 +19,12 @@ For each benchmark, rows are evaluated model/prompt combinations and columns are
 `correctness_matrix_*.csv` contains 0/1 scores. `cot_length_matrix_*.csv` contains token counts
 for the generated reasoning before the final boxed answer. Application scripts add one to counts
 before taking logarithms, preserving rows where generation yielded a zero count.
+
+## Post-processed application data
+
+`processed/` contains the fitted application parameters, predictive-power results, validity
+partitions, item/LLM-efficiency trajectories, and fixed item selection used for the Section 7
+tables and figures. These compact publication data are versioned; newly generated runs are not.
 
 The public matrices are post-processed evaluation data. Users regenerating them should inspect
 the sample workflow in `data_generation/` and apply a suitable mathematical answer grader.

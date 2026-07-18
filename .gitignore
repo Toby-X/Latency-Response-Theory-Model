@@ -8,7 +8,6 @@ build/
 dist/
 *.egg-info/
 results/
-data/processed/
 validation/results/
 figures/
 evaluation_results/

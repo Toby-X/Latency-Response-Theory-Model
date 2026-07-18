@@ -5,5 +5,5 @@ outputs and execution counts removed to keep the repository compact and reviewab
 `application_analysis.ipynb` contains the Section 7 tables and plots; `simulation_analysis.ipynb`
 contains the Section 6 and Appendix E plots.
 
-They preserve the final research workflow. Run the scripts in `applications/` and `simulations/`
-first to generate the unversioned inputs used by these notebooks.
+They preserve the final research workflow. The exact application inputs are included under
+`data/processed/`; simulation-result inputs can be regenerated with the scripts in `simulations/`.

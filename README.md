@@ -45,6 +45,7 @@ src/lart/          reference SAEM estimator, validated API, and synthetic genera
 simulations/       Section 6 and Appendix E simulation programs
 applications/      Section 7 real-data estimation and comparison programs
 data/benchmarks/   post-processed 0/1 accuracy and CoT-token matrices
+data/processed/    post-processed application data used for paper tables and figures
 data_generation/   sample vLLM generation and matrix-building workflow
 notebooks/          output-free manuscript analysis notebooks
 validation/         working-code comparison and repository-wide smoke test
@@ -68,6 +69,9 @@ validation/         working-code comparison and repository-wide smoke test
 
 All publication-facing functions, scripts, labels, and retained-result filenames use the final
 LaRT/IRT terminology.
+
+The exact Section 7 post-processed application data are included under `data/processed/`. Large
+Monte Carlo experiment outputs and newly generated fits are not committed.
 
 ## Reproducing simulations
 
@@ -94,9 +98,10 @@ python applications/predictive_power.py
 python applications/validity_math500.py
 ```
 
-These jobs are computationally intensive. Fitted parameters and experiment results are generated
-locally under `results/`, which is intentionally excluded from version control. See
-`applications/README.md` and `data/README.md` for details.
+These jobs are computationally intensive. The post-processed application data used in the paper
+are included under `data/processed/`; newly fitted parameters are written locally under `results/`,
+which is intentionally excluded from version control. See `applications/README.md` and
+`data/README.md` for details.
 
 ## Response generation
 
