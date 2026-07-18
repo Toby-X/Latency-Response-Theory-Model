@@ -1,7 +1,8 @@
 # Data
 
-This directory contains the post-processed inputs and saved estimates used in the paper. It does
-not contain the much larger raw model generations.
+This directory contains the post-processed inputs and saved estimates used in the
+[LaRT paper](https://arxiv.org/abs/2512.07019). It does not contain the much larger raw model
+generations.
 
 ## Benchmark matrices
 

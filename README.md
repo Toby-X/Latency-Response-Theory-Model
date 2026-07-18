@@ -2,16 +2,16 @@
 
 Official research code and post-processed data for:
 
-> **Latency-Response Theory Model: Evaluating Large Language Models via Response Accuracy and Chain-of-Thought Length**
+> **[Latency-Response Theory Model: Evaluating Large Language Models via Response Accuracy and Chain-of-Thought Length](https://arxiv.org/abs/2512.07019)**
 > Zhiyu Xu, Jia Liu, Yixin Wang, and Yuqi Gu
 
 LaRT jointly models whether an LLM answers an item correctly and how many Chain-of-Thought
 (CoT) tokens it uses before the final answer. The joint model estimates latent mathematical
 ability, latent speed, item accuracy parameters, item latency parameters, and their correlation.
 
-This repository follows the structure of the current LaRT manuscript and uses the actual research
-implementation and experiment files. The earlier AI-written repository summary is not used as a
-source of algorithmic code.
+This repository follows the structure of the current [LaRT paper](https://arxiv.org/abs/2512.07019)
+and uses the actual research implementation and experiment files. The earlier AI-written repository
+summary is not used as a source of algorithmic code.
 
 ## Quick start
 
@@ -120,5 +120,5 @@ scored JSONL records to LaRT matrices.
 
 ## Citation and license
 
-Citation metadata is provided in `CITATION.cff`. The code is released under the MIT License; see
-`LICENSE`.
+Paper: [arXiv:2512.07019](https://arxiv.org/abs/2512.07019). Citation metadata is provided in
+`CITATION.cff`. The code is released under the MIT License; see `LICENSE`.

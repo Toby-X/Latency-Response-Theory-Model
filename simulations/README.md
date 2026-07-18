@@ -1,8 +1,8 @@
 # Simulation programs
 
-All generators are included, so a simulation can be run without downloading data. The full paper
-settings use 200 replications and can be computationally expensive. Each script respects
-`SLURM_CPUS_PER_TASK` when choosing its process count.
+All generators are included, so a simulation can be run without downloading data. The full settings
+in the [LaRT paper](https://arxiv.org/abs/2512.07019) use 200 replications and can be computationally
+expensive. Each script respects `SLURM_CPUS_PER_TASK` when choosing its process count.
 
 | Paper location | Program | Design |
 |---|---|---|

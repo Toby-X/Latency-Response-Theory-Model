@@ -24,8 +24,8 @@ python validation/compare_working_folder.py \
 The committed run uses five datasets with 40 models, 12 items, true
 `rho = -0.8`, one posterior sample per iteration, and at most 50 iterations.
 RMSE is used for vector parameters and absolute error for `rho`, matching the
-paper's simulation metrics. This is a smoke-scale check rather than the full
-Monte Carlo study.
+[LaRT paper's](https://arxiv.org/abs/2512.07019) simulation metrics. This is a smoke-scale check
+rather than the full Monte Carlo study.
 
 ## Repository-wide smoke test
 

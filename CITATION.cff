@@ -17,6 +17,8 @@ authors:
 preferred-citation:
   type: article
   title: "Latency-Response Theory Model: Evaluating Large Language Models via Response Accuracy and Chain-of-Thought Length"
+  url: "https://arxiv.org/abs/2512.07019"
+  doi: "10.48550/arXiv.2512.07019"
   authors:
     - family-names: Xu
       given-names: Zhiyu
@@ -26,4 +28,4 @@ preferred-citation:
       given-names: Yixin
     - family-names: Gu
       given-names: Yuqi
-  year: 2026
+  year: 2025

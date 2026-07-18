@@ -1,7 +1,8 @@
 # Real-data applications
 
-These programs reproduce the model fits underlying Section 7. Install the package first. Inputs
-are versioned under `data/benchmarks/`; final saved fits are under `data/processed/`.
+These programs reproduce the Section 7 model fits in the
+[LaRT paper](https://arxiv.org/abs/2512.07019). Install the package first. Inputs are versioned
+under `data/benchmarks/`; final saved fits are under `data/processed/`.
 
 | Paper analysis | Program | Dataset |
 |---|---|---|
