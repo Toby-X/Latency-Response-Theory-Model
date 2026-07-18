@@ -1,0 +1,65 @@
+{
+  "design": {
+    "replicates": 5,
+    "n_models": 40,
+    "n_items": 12,
+    "rho": -0.8,
+    "n_samples": 1,
+    "max_iter": 50,
+    "data_seeds": [
+      100,
+      101,
+      102,
+      103,
+      104
+    ],
+    "fit_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "previous_release": {
+    "commit": "e09e0f710957edfe33df4a63ada606041f0943ef",
+    "lart_py_sha256": "c028e31f48ba0125eb34eb54f41e9197a38aa3ca7392188dfb5b386d4eeb474d",
+    "entry_point": "LaRT.py:LaRT_SAEM_full"
+  },
+  "methods": {
+    "current": {
+      "successful_fits": 5,
+      "failed_fits": 0,
+      "mean_runtime_seconds": 9.1875164170051,
+      "mean_metrics_over_successful_fits": {
+        "rmse_theta": 0.5274568303474885,
+        "rmse_tau": 0.35610201892005844,
+        "rmse_a": 0.7435120397939559,
+        "rmse_b": 0.38616796481193466,
+        "rmse_omega": 0.22576353965779225,
+        "rmse_phi": 0.23401733800064797,
+        "rmse_lam": 0.12825231680073873,
+        "abs_error_rho": 0.18312911475387117
+      },
+      "errors": []
+    },
+    "previous_release": {
+      "successful_fits": 0,
+      "failed_fits": 5,
+      "mean_runtime_seconds": 0.10609560840530322,
+      "mean_metrics_over_successful_fits": {
+        "rmse_theta": null,
+        "rmse_tau": null,
+        "rmse_a": null,
+        "rmse_b": null,
+        "rmse_omega": null,
+        "rmse_phi": null,
+        "rmse_lam": null,
+        "abs_error_rho": null
+      },
+      "errors": [
+        "ValueError: operands could not be broadcast together with shapes (40,) (12,) "
+      ]
+    }
+  }
+}
