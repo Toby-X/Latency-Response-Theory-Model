@@ -31,7 +31,7 @@ rather than the full Monte Carlo study.
 
 `smoke_test_repo.py` performs reduced, non-destructive execution checks across
 the package, every simulation program, every application program, both data
-generation utilities, saved data artifacts, and notebook code cells. Simulation
+generation utilities, benchmark data, and notebook code cells. Simulation
 and application fits use only two SAEM iterations and write temporary outputs.
 
 Install the simulation extra and run:
@@ -44,5 +44,5 @@ python validation/smoke_test_repo.py \
 
 The vLLM inference pathway is reported separately because it requires a CUDA
 GPU and a downloaded model. Its import behavior, prompt/parser utilities, and
-command-line interface are tested on CPU. The committed report is
-`validation/results/repo_smoke_test.json`.
+command-line interface are tested on CPU. Pass `--output PATH` to save an optional local report;
+validation reports are not versioned.

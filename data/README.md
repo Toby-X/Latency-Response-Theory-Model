@@ -1,8 +1,8 @@
 # Data
 
-This directory contains the post-processed inputs and saved estimates used in the
-[LaRT paper](https://arxiv.org/abs/2512.07019). It does not contain the much larger raw model
-generations.
+This directory contains the post-processed benchmark inputs used in the
+[LaRT paper](https://arxiv.org/abs/2512.07019). It contains neither saved model fits nor the much
+larger raw model generations.
 
 ## Benchmark matrices
 
@@ -19,13 +19,6 @@ For each benchmark, rows are evaluated model/prompt combinations and columns are
 `correctness_matrix_*.csv` contains 0/1 scores. `cot_length_matrix_*.csv` contains token counts
 for the generated reasoning before the final boxed answer. Application scripts add one to counts
 before taking logarithms, preserving rows where generation yielded a zero count.
-
-## Processed estimates
-
-`processed/` contains only the fitted parameter arrays, cross-validation training fits, validity
-subsets, item/LLM-efficiency trajectories, and fixed item selection used by the current paper.
-Historical duplicate suffixes and outputs from analyses omitted from the paper have been removed;
-the canonical filenames contain the exact estimates used for the reported figures and tables.
 
 The public matrices are post-processed evaluation data. Users regenerating them should inspect
 the sample workflow in `data_generation/` and apply a suitable mathematical answer grader.

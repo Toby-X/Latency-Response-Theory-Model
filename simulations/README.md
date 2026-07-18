@@ -22,4 +22,4 @@ After installing the package, run a program from the repository root, for exampl
 SLURM_CPUS_PER_TASK=8 python simulations/vary_correlation.py
 ```
 
-The exact post-processed outputs used for manuscript plots are in `results/simulations/`.
+Generated outputs are written to ignored `results/simulations/`; no fitted results are versioned.

@@ -4,17 +4,16 @@ import pandas as pd
 import multiprocess as mp
 from functools import partial
 from pathlib import Path
+from scipy.stats import norm
 
 from lart import irt_saem_full, lart_saem_full
 
 # --- Data Loading and Preprocessing (Unchanged) ---
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / 'data' / 'benchmarks'
-PROCESSED_DIR = REPO_ROOT / 'data' / 'processed'
 OUTPUT_DIR = REPO_ROOT / 'results' / 'applications'
 binary_df_math500 = pd.read_csv(DATA_DIR / 'correctness_matrix_math500.csv', index_col=0)
 cot_df_math500 = pd.read_csv(DATA_DIR / 'cot_length_matrix_math500.csv', index_col=0)
-question_list = np.load(PROCESSED_DIR / 'question_list.npy')
 
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
@@ -44,28 +43,44 @@ binary_array = binary_df_math500.to_numpy()
 cot_array = cot_df_math500.to_numpy()
 cot_array += 1
 
-binary_array = binary_array[:, question_list]
-cot_array = cot_array[:, question_list]
-
 np.random.seed(42)
 shuffle_indices = np.random.permutation(binary_array.shape[0])
-
-# first_col = binary_df.columns[0]
-# zero_rows = binary_df.iloc[:, 1:].eq(0).all(axis=1)
-# non_zero_indices = ~zero_rows
-
-# binary_df = binary_df[non_zero_indices].reset_index(drop=True)
-# cot_df = cot_df[non_zero_indices].reset_index(drop=True)
-
-# binary_array = binary_df.iloc[:, 1:].values
-# cot_array = cot_df.iloc[:, 1:].values
-# cot_array = cot_array.astype(np.float64)
-
-# rows_with_zeros = np.any(cot_array == 0, axis=1)
-# cot_array = cot_array[~rows_with_zeros].copy()
-# binary_array = binary_array[~rows_with_zeros].copy()
+binary_array = binary_array[shuffle_indices]
+cot_array = cot_array[shuffle_indices]
 
 N, J = binary_array.shape
+
+
+def item_fisher_information(a, b, theta):
+    """Normal-ogive Fisher information for every LLM-item pair."""
+    value = a[np.newaxis, :] * theta[:, np.newaxis] + b[np.newaxis, :]
+    log_information = (
+        2 * norm.logpdf(value)
+        + 2 * np.log(np.maximum(a, 1e-12))[np.newaxis, :]
+        - norm.logcdf(value)
+        - norm.logcdf(-value)
+    )
+    return np.exp(log_information)
+
+
+def select_questions(response, latency, num_questions=100, max_iter=100, seed=42):
+    """Generate the MATH500 item set used in Section 7.2.4 from full-data fits."""
+    lart = lart_saem_full(
+        response, latency, n_samples=1, seed=seed, max_iter=max_iter
+    )
+    irt = irt_saem_full(response, n_samples=1, seed=seed, max_iter=max_iter)
+    lart_order = np.argsort(
+        -np.sum(item_fisher_information(lart[2], lart[3], lart[0]), axis=0)
+    )
+    irt_order = np.argsort(
+        -np.sum(item_fisher_information(irt[1], irt[2], irt[0]), axis=0)
+    )
+    combined = np.unique(
+        np.concatenate([lart_order[:num_questions], irt_order[:num_questions]])
+    )
+    if combined.size < num_questions:
+        raise RuntimeError("the combined information ranking contains too few unique items")
+    return combined[:num_questions]
 
 # --- Main Execution Block for Parallel Processing ---
 def run_model_task(task_tuple, binary_data, cot_data, max_iter=100, seed=42):
@@ -118,9 +133,9 @@ def run_model_task(task_tuple, binary_data, cot_data, max_iter=100, seed=42):
 
 
 if __name__ == "__main__":
-    # (Load your data here)
-    # binary_array = pd.read_csv(...).to_numpy()
-    # cot_array = pd.read_csv(...).to_numpy()
+    question_list = select_questions(binary_array, cot_array)
+    selected_binary = binary_array[:, question_list]
+    selected_cot = cot_array[:, question_list]
 
     # The full N=140 fit is the ground truth; Table 2 reports the four subsets.
     N_values = [50, 75, 100, 125]
@@ -134,7 +149,9 @@ if __name__ == "__main__":
     # 2. Create a "partial" worker function
     # This "bakes in" the large data arrays so we don't need to pass them
     # in every task tuple. They will be inherited by the child processes.
-    worker_fn = partial(run_model_task, binary_data=binary_array, cot_data=cot_array)
+    worker_fn = partial(
+        run_model_task, binary_data=selected_binary, cot_data=selected_cot
+    )
 
     # 3. Run all tasks in parallel
     print(f"Starting parallel pool with {n_cores} cores for {len(tasks_list)} tasks.")
@@ -166,6 +183,7 @@ if __name__ == "__main__":
 
     # 5. Save the final file
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    np.save(OUTPUT_DIR / 'question_list.npy', question_list)
     output_path = OUTPUT_DIR / 'sensitivity_math500.parquet'
     results_df.to_parquet(output_path, index=False)
     print(f"Results saved to '{output_path}'")

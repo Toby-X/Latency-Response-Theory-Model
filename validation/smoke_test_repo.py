@@ -189,25 +189,34 @@ def check_predictive_power() -> str:
 
 def _application_efficiency(path: Path) -> str:
     module = _load_file(path, "efficiency")
-    n_models, n_items, initial_items = 4, 6, 4
+    n_models, n_items, fit_items, initial_items = 4, 6, 12, 4
     response = np.asarray(module.binary_array[:n_models, :n_items])
     latency = np.asarray(module.cot_array[:n_models, :n_items], dtype=float)
+    prediction = _load_file(
+        ROOT / "applications" / "predictive_power.py", "efficiency_prediction"
+    )
+    parameters = prediction.fit_training_models(
+        module.binary_array[:20, :fit_items],
+        module.cot_array[:20, :fit_items],
+        max_iter=2,
+        seed=5,
+    )
     joint = module.step_wise_evaluation_joint(
         response,
         latency,
-        module.a_joint[:n_items],
-        module.b_joint[:n_items],
-        module.omega_joint[:n_items],
-        module.phi_joint[:n_items],
-        module.lam_joint[:n_items],
-        float(module.rho_joint),
+        parameters["a_lart_train"][:n_items],
+        parameters["b_lart_train"][:n_items],
+        parameters["omega_lart_train"][:n_items],
+        parameters["phi_lart_train"][:n_items],
+        parameters["lam_lart_train"][:n_items],
+        float(parameters["rho_lart"]),
         num_items=initial_items,
         n_steps=n_items,
     )
     irt = module.step_wise_evaluation_irt(
         response,
-        module.a_irt[:n_items],
-        module.b_irt[:n_items],
+        parameters["a_irt_train"][:n_items],
+        parameters["b_irt_train"][:n_items],
         num_items=initial_items,
         n_steps=n_items,
     )
@@ -217,8 +226,13 @@ def _application_efficiency(path: Path) -> str:
 
 def check_sensitivity() -> str:
     module = _load_file(ROOT / "applications" / "sensitivity_math500.py", "sensitivity")
-    response = module.binary_array[:20, :12]
-    latency = module.cot_array[:20, :12]
+    full_response = module.binary_array[:20, :12]
+    full_latency = module.cot_array[:20, :12]
+    questions = module.select_questions(
+        full_response, full_latency, num_questions=6, max_iter=2, seed=5
+    )
+    response = full_response[:, questions]
+    latency = full_latency[:, questions]
     lart_result = module.run_model_task(
         (20, "LaRT"), response, latency, max_iter=2, seed=5
     )
@@ -325,65 +339,14 @@ def check_previous_comparison(working_dir: Path | None) -> str:
 
 
 def check_data_artifacts() -> str:
-    csv_count = parquet_count = npz_count = 0
-    for path in (ROOT / "data").rglob("*.csv"):
+    csv_count = 0
+    for path in (ROOT / "data" / "benchmarks").rglob("*.csv"):
         pd.read_csv(path, index_col=0)
         csv_count += 1
-    for base in (ROOT / "data", ROOT / "results"):
-        for path in base.rglob("*.parquet"):
-            pd.read_parquet(path)
-            parquet_count += 1
-    for path in (ROOT / "data").rglob("*.npz"):
-        with np.load(path) as archive:
-            for name in archive.files:
-                np.asarray(archive[name])
-        npz_count += 1
-    return f"read {csv_count} CSV, {parquet_count} Parquet, and {npz_count} NPZ files"
-
-
-def check_paper_application_artifacts() -> str:
-    """Verify that retained application outputs reproduce paper values and dimensions."""
-    processed = ROOT / "data" / "processed"
-    sensitivity = pd.read_parquet(processed / "sensitivity_math500.parquet")
-    ground_truth = pd.read_parquet(processed / "estimated_parameters_math500_all.parquet")
-    questions = np.load(processed / "question_list.npy")
-    if sensitivity["N"].tolist() != [50, 75, 100, 125]:
-        raise AssertionError("LLM-efficiency output contains a sample size not shown in Table 2")
-
-    expected = {
-        ("a", "irt"): [28.8248, 5.5137, 0.9078, 0.6288],
-        ("a", "joint"): [3.8537, 5.6749, 0.8896, 0.5825],
-        ("b", "irt"): [18.5782, 2.7583, 0.7409, 0.7464],
-        ("b", "joint"): [2.3181, 3.0197, 0.7105, 0.7010],
-    }
-    for (parameter, model), target in expected.items():
-        truth = np.asarray(ground_truth[f"{parameter}_{model}"].iloc[0])[questions]
-        observed = [
-            np.sqrt(np.mean((np.asarray(value)[0] - truth) ** 2))
-            for value in sensitivity[f"{parameter}_{model}"]
-        ]
-        if not np.allclose(observed, target, atol=5e-5):
-            raise AssertionError(((parameter, model), observed, target))
-
-    joint = pd.read_parquet(
-        processed / "estimated_parameters_joint_validity_math500.parquet"
-    )
-    irt = pd.read_parquet(processed / "estimated_parameters_irt_validity_math500.parquet")
-    joint_variance = float(np.sum(np.var(joint["theta_joint"].to_numpy())))
-    irt_variance = float(np.sum(np.var(irt["theta_irt"].to_numpy())))
-    if not np.allclose([joint_variance, irt_variance], [2.01315357, 2.34234454]):
-        raise AssertionError((joint_variance, irt_variance))
-
-    with np.load(processed / "rest3_pred_params.npz") as prediction:
-        if prediction["a_lart_train"].shape != (100,):
-            raise AssertionError("predictive fit is not the paper's 100-item three-benchmark fit")
-    predictive_scores = pd.read_csv(processed / "predictive_power_mae.csv")
-    expected_scores = np.array(
-        [[0.235, 0.391], [0.177, 0.190], [0.183, 0.268], [0.160, 0.257], [0.161, 0.238]]
-    )
-    if not np.allclose(predictive_scores[["lart_mae", "irt_mae"]], expected_scores):
-        raise AssertionError("predictive scores do not match Table 1")
-    return "Tables 1-2, validity variances, and predictive dimensions match the paper"
+    for removed in (ROOT / "data" / "processed", ROOT / "results"):
+        if removed.exists():
+            raise AssertionError(f"committed output directory still exists: {removed}")
+    return f"read {csv_count} benchmark CSV files; no saved-fit/output directories present"
 
 
 def main() -> None:
@@ -397,7 +360,8 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "validation" / "results" / "repo_smoke_test.json",
+        default=None,
+        help="optional path for a JSON report; no report is saved by default",
     )
     args = parser.parse_args()
 
@@ -460,12 +424,7 @@ def main() -> None:
                 "validation/compare_working_folder.py",
                 lambda: check_previous_comparison(args.working_dir),
             ),
-            ("data-artifacts", "data/ and results/", check_data_artifacts),
-            (
-                "paper-application-artifacts",
-                "data/processed/",
-                check_paper_application_artifacts,
-            ),
+            ("data-artifacts", "data/benchmarks/", check_data_artifacts),
         ]
     )
 
@@ -506,9 +465,10 @@ def main() -> None:
         },
         "results": results,
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    print(f"\nReport: {args.output}")
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+        print(f"\nReport: {args.output}")
     if summary["counts"]["failed"]:
         raise SystemExit(1)
 

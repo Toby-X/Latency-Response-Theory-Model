@@ -9,20 +9,9 @@ from scipy.optimize import minimize
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / 'data' / 'benchmarks'
-PROCESSED_DIR = REPO_ROOT / 'data' / 'processed'
 OUTPUT_DIR = REPO_ROOT / 'results' / 'applications'
 binary_df = pd.read_csv(DATA_DIR / 'correctness_matrix_combined.csv', index_col=0)
 cot_df = pd.read_csv(DATA_DIR / 'cot_length_matrix_combined.csv', index_col=0)
-
-estimated_parameters = np.load(PROCESSED_DIR / "rest3_pred_params.npz")
-a_joint = estimated_parameters['a_lart_train']
-b_joint = estimated_parameters['b_lart_train']
-omega_joint = estimated_parameters['omega_lart_train']
-phi_joint = estimated_parameters['phi_lart_train']
-lam_joint = estimated_parameters['lam_lart_train']
-rho_joint = estimated_parameters['rho_lart']
-a_irt = estimated_parameters['a_irt_train']
-b_irt = estimated_parameters['b_irt_train']
 
 from lart import update_indi_fixed_all # note that have to use log_T in this case
 
@@ -211,7 +200,21 @@ chosen_models_bool[chosen_models] = True
 # --- 1. Define a More Generic Worker Function ---
 # --- 2. Main Execution Block ---
 if __name__ == "__main__":
-    # Create a flat list of all 10 tasks to run
+    # Generate the Section 7.2.1 item fits instead of relying on committed outputs.
+    from predictive_power import fit_training_models
+
+    parameters = fit_training_models(
+        binary_array[chosen_models_bool], cot_array[chosen_models_bool], seed=42
+    )
+    a_lart = np.asarray(parameters['a_lart_train'])
+    b_lart = np.asarray(parameters['b_lart_train'])
+    omega_lart = np.asarray(parameters['omega_lart_train'])
+    phi_lart = np.asarray(parameters['phi_lart_train'])
+    lam_lart = np.asarray(parameters['lam_lart_train'])
+    rho_lart = float(parameters['rho_lart'])
+    a_irt = np.asarray(parameters['a_irt_train'])
+    b_irt = np.asarray(parameters['b_irt_train'])
+
     with mp.Pool(processes=2) as pool:
         print("Starting LaRT and IRT model fitting in parallel...")
 
@@ -219,9 +222,9 @@ if __name__ == "__main__":
         lart_result_async = pool.apply_async(
             step_wise_evaluation_joint,
             args=(binary_array[~chosen_models_bool], cot_array[~chosen_models_bool],
-                  a_joint, b_joint,
-                  omega_joint, phi_joint,
-                  lam_joint, rho_joint),
+                  a_lart, b_lart,
+                  omega_lart, phi_lart,
+                  lam_lart, rho_lart),
             kwds={'num_items': 10}
         )
 
@@ -242,11 +245,11 @@ if __name__ == "__main__":
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
-    OUTPUT_DIR / 'efficiency_rest3.npz',
-    rank_lart=rank_lart,
-    rank_irt=rank_irt,
-    theta_lart=theta_lart,
-    theta_irt=theta_irt
+        OUTPUT_DIR / 'efficiency_rest3.npz',
+        rank_lart=rank_lart,
+        rank_irt=rank_irt,
+        theta_lart=theta_lart,
+        theta_irt=theta_irt
     )
 
     print("Results saved to 'efficiency_rest3.npz'")
