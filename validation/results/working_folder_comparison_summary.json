@@ -1,0 +1,73 @@
+{
+  "design": {
+    "replicates": 5,
+    "n_models": 40,
+    "n_items": 12,
+    "rho": -0.8,
+    "n_samples": 1,
+    "max_iter": 50,
+    "data_seeds": [
+      100,
+      101,
+      102,
+      103,
+      104
+    ],
+    "fit_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "previous_working_code": {
+    "directory": "/Users/zhiyuxu/Programmes/LLM_Eval",
+    "entry_point": "cMIRT_EM_c.py:cMIRT_SAEM_full",
+    "estimator_sha256": "6a70f53fa17af3dd111b168198980ba19a3846d5431e5865d05ee4f7851ebad2",
+    "sampler_sha256": "5e838f9e959095ed2b8c50fec5167b484c95fda45d6687cd4f8d3e03c499243a"
+  },
+  "methods": {
+    "latest_packaged": {
+      "successful_fits": 5,
+      "mean_runtime_seconds": 8.197420691594015,
+      "mean_n_iter": 50.0,
+      "mean_metrics": {
+        "rmse_theta": 0.5274568303472713,
+        "rmse_tau": 0.35610201892086335,
+        "rmse_a": 0.7435120397957554,
+        "rmse_b": 0.38616796481213717,
+        "rmse_omega": 0.22576353965781554,
+        "rmse_phi": 0.23401733800181307,
+        "rmse_lam": 0.12825231680073299,
+        "abs_error_rho": 0.18312911475652474
+      }
+    },
+    "previous_working_folder": {
+      "successful_fits": 5,
+      "mean_runtime_seconds": 8.286915441195015,
+      "mean_n_iter": 50.0,
+      "mean_metrics": {
+        "rmse_theta": 0.5274568303590281,
+        "rmse_tau": 0.35610201893392024,
+        "rmse_a": 0.7435120398293632,
+        "rmse_b": 0.386167964832916,
+        "rmse_omega": 0.22576353967469548,
+        "rmse_phi": 0.23401733799528665,
+        "rmse_lam": 0.12825231680078492,
+        "abs_error_rho": 0.18312911474077354
+      }
+    }
+  },
+  "direct_estimate_comparison": {
+    "max_abs_diff_theta": 2.8043634081598157e-10,
+    "max_abs_diff_tau": 2.1975887776193304e-10,
+    "max_abs_diff_a": 5.998308516552697e-10,
+    "max_abs_diff_b": 3.214383204053206e-10,
+    "max_abs_diff_omega": 1.5059509195225473e-10,
+    "max_abs_diff_phi": 1.318032349928444e-10,
+    "max_abs_diff_lam": 8.000156093146416e-12,
+    "max_abs_diff_rho": 7.722888994976529e-11
+  },
+  "same_iteration_count_in_every_replicate": true
+}
