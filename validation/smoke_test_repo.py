@@ -156,15 +156,35 @@ def check_simulation_output() -> str:
     return "Parquet output helper completed a temporary round trip"
 
 
-def _application_fit(path: Path) -> str:
-    module = _load_file(path, "application")
-    response = np.asarray(module.binary_array[:20, :12])
-    latency = np.asarray(module.cot_array[:20, :12], dtype=float)
+def check_benchmark_estimation() -> str:
+    module = _load_file(ROOT / "applications" / "estimate_benchmarks.py", "application")
+    full_response, full_latency = module.load_benchmark("math500")
+    response = np.asarray(full_response[:20, :12])
+    latency = np.asarray(full_latency[:20, :12], dtype=float)
     lart_result = module.lart_saem_full(response, latency, seed=5, max_iter=2)
     irt_result = module.irt_saem_full(response, seed=5, max_iter=2)
     _finite_tuple(tuple(lart_result))
     _finite_tuple(tuple(irt_result))
-    return f"loaded real matrices {module.binary_array.shape}; reduced LaRT/IRT fits completed"
+    return f"loaded separate MATH500 matrix {full_response.shape}; reduced fits completed"
+
+
+def check_predictive_power() -> str:
+    module = _load_file(ROOT / "applications" / "predictive_power.py", "prediction")
+    train_response = module.binary_array[:20, :12]
+    train_latency = module.cot_array[:20, :12]
+    parameters = module.fit_training_models(
+        train_response, train_latency, max_iter=2, seed=5
+    )
+    scores = module.cross_validated_mae(
+        module.binary_array[20:24, :12],
+        module.cot_array[20:24, :12],
+        parameters,
+        n_folds=3,
+        seed=5,
+    )
+    if scores.shape != (3, 3) or not np.isfinite(scores.to_numpy()).all():
+        raise AssertionError(scores)
+    return "three-benchmark training fit and held-out item folds completed"
 
 
 def _application_efficiency(path: Path) -> str:
@@ -341,6 +361,51 @@ def check_data_artifacts() -> str:
     return f"read {csv_count} CSV, {parquet_count} Parquet, and {npz_count} NPZ files"
 
 
+def check_paper_application_artifacts() -> str:
+    """Verify that retained application outputs reproduce paper values and dimensions."""
+    processed = ROOT / "data" / "processed"
+    sensitivity = pd.read_parquet(processed / "sensitivity_math500.parquet")
+    ground_truth = pd.read_parquet(processed / "estimated_parameters_math500_all.parquet")
+    questions = np.load(processed / "question_list.npy")
+    if sensitivity["N"].tolist() != [50, 75, 100, 125]:
+        raise AssertionError("LLM-efficiency output contains a sample size not shown in Table 2")
+
+    expected = {
+        ("a", "irt"): [28.8248, 5.5137, 0.9078, 0.6288],
+        ("a", "joint"): [3.8537, 5.6749, 0.8896, 0.5825],
+        ("b", "irt"): [18.5782, 2.7583, 0.7409, 0.7464],
+        ("b", "joint"): [2.3181, 3.0197, 0.7105, 0.7010],
+    }
+    for (parameter, model), target in expected.items():
+        truth = np.asarray(ground_truth[f"{parameter}_{model}"].iloc[0])[questions]
+        observed = [
+            np.sqrt(np.mean((np.asarray(value)[0] - truth) ** 2))
+            for value in sensitivity[f"{parameter}_{model}"]
+        ]
+        if not np.allclose(observed, target, atol=5e-5):
+            raise AssertionError(((parameter, model), observed, target))
+
+    joint = pd.read_parquet(
+        processed / "estimated_parameters_joint_validity_math500.parquet"
+    )
+    irt = pd.read_parquet(processed / "estimated_parameters_irt_validity_math500.parquet")
+    joint_variance = float(np.sum(np.var(joint["theta_joint"].to_numpy())))
+    irt_variance = float(np.sum(np.var(irt["theta_irt"].to_numpy())))
+    if not np.allclose([joint_variance, irt_variance], [2.01315357, 2.34234454]):
+        raise AssertionError((joint_variance, irt_variance))
+
+    with np.load(processed / "rest3_pred_params.npz") as prediction:
+        if prediction["a_lart_train"].shape != (100,):
+            raise AssertionError("predictive fit is not the paper's 100-item three-benchmark fit")
+    predictive_scores = pd.read_csv(processed / "predictive_power_mae.csv")
+    expected_scores = np.array(
+        [[0.235, 0.391], [0.177, 0.190], [0.183, 0.268], [0.160, 0.257], [0.161, 0.238]]
+    )
+    if not np.allclose(predictive_scores[["lart_mae", "irt_mae"]], expected_scores):
+        raise AssertionError("predictive scores do not match Table 1")
+    return "Tables 1-2, validity variances, and predictive dimensions match the paper"
+
+
 def check_pytest() -> str:
     output = _subprocess([sys.executable, "-m", "pytest", "-q"])
     return output.splitlines()[-1]
@@ -378,39 +443,20 @@ def main() -> None:
         [
             ("simulation-output", "simulations/_output.py", check_simulation_output),
             (
-                "application:estimation_all",
-                "applications/estimation_all.py",
-                lambda: _application_fit(ROOT / "applications" / "estimation_all.py"),
+                "application:estimate_benchmarks",
+                "applications/estimate_benchmarks.py",
+                check_benchmark_estimation,
             ),
             (
-                "application:estimation_math500_all",
-                "applications/estimation_math500_all.py",
-                lambda: _application_fit(
-                    ROOT / "applications" / "estimation_math500_all.py"
-                ),
+                "application:predictive_power",
+                "applications/predictive_power.py",
+                check_predictive_power,
             ),
             (
-                "application:prediction_all",
-                "applications/prediction_all.py",
-                lambda: _application_fit(ROOT / "applications" / "prediction_all.py"),
-            ),
-            (
-                "application:prediction_math500",
-                "applications/prediction_math500.py",
-                lambda: _application_fit(ROOT / "applications" / "prediction_math500.py"),
-            ),
-            (
-                "application:efficiency_math500",
-                "applications/efficiency_math500.py",
+                "application:item_efficiency",
+                "applications/item_efficiency.py",
                 lambda: _application_efficiency(
-                    ROOT / "applications" / "efficiency_math500.py"
-                ),
-            ),
-            (
-                "application:efficiency_rest3",
-                "applications/efficiency_rest3.py",
-                lambda: _application_efficiency(
-                    ROOT / "applications" / "efficiency_rest3.py"
+                    ROOT / "applications" / "item_efficiency.py"
                 ),
             ),
             (
@@ -441,6 +487,11 @@ def main() -> None:
                 lambda: check_previous_comparison(args.working_dir),
             ),
             ("data-artifacts", "data/ and results/", check_data_artifacts),
+            (
+                "paper-application-artifacts",
+                "data/processed/",
+                check_paper_application_artifacts,
+            ),
             ("pytest", "tests/", check_pytest),
         ]
     )

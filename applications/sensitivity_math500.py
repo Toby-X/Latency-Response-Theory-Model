@@ -122,12 +122,13 @@ if __name__ == "__main__":
     # binary_array = pd.read_csv(...).to_numpy()
     # cot_array = pd.read_csv(...).to_numpy()
 
-    N_values = [25, 50, 75, 100, 125]
+    # The full N=140 fit is the ground truth; Table 2 reports the four subsets.
+    N_values = [50, 75, 100, 125]
     model_types = ['LaRT', 'IRT']
     n_cores = int(os.getenv('SLURM_CPUS_PER_TASK', 8))
 
     # 1. Create the full list of tasks
-    # This will be [(25, 'LaRT'), (25, 'IRT'), (50, 'LaRT'), ...]
+    # This will be [(50, 'LaRT'), (50, 'IRT'), (75, 'LaRT'), ...]
     tasks_list = [(N, model) for N in N_values for model in model_types]
 
     # 2. Create a "partial" worker function

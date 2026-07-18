@@ -67,11 +67,11 @@ validation/         working-code comparison and repository-wide smoke test
 | Appendix E.2, Fig. S3 | `simulations/vary_correlation.py` | `results/simulations/LaRT_sim_varyRho_N200_J50(1).parquet` |
 | Appendix E.2, Fig. S4 | `simulations/vary_test_length.py` | `results/simulations/LaRT_sim_fixedN200_varyJ(1).parquet` |
 | Appendix E.3, Figs. S5-S6 | `simulations/traditional_saem_comparison.py`, `src/lart/traditional_saem.py` | `results/simulations/LaRT_sim_con_5*.parquet` |
-| Section 7.1 qualitative fits | `applications/estimation_all.py`, `applications/estimation_math500_all.py` | `data/processed/estimated_parameters_*.parquet` |
-| Section 7.2.1 predictive power | `applications/prediction_all.py` | `data/processed/rest3_pred_params.npz` |
-| Section 7.2.2 item efficiency | `applications/efficiency_rest3.py` | `data/processed/efficiency_rest3.npz` |
-| Section 7.2.3 validity | `applications/validity_math500.py` | `data/processed/estimated_parameters_*_validity_math500(1).parquet` |
-| Section 7.2.4 LLM efficiency | `applications/sensitivity_math500.py` | `data/processed/sensitivity_math500(1).parquet` |
+| Section 7.1 qualitative fits (four datasets, fitted separately) | `applications/estimate_benchmarks.py` | `data/processed/estimated_parameters_math500_all.parquet`, `estimated_parameters_three_benchmarks.parquet` |
+| Section 7.2.1 predictive power (AMC23 + AIME24 + AIME25) | `applications/predictive_power.py` | `data/processed/rest3_pred_params.npz`, `predictive_power_mae.csv` |
+| Section 7.2.2 item efficiency (AMC23 + AIME24 + AIME25) | `applications/item_efficiency.py` | `data/processed/efficiency_rest3.npz` |
+| Section 7.2.3 validity (MATH500) | `applications/validity_math500.py` | `data/processed/estimated_parameters_*_validity_math500.parquet` |
+| Section 7.2.4 LLM efficiency (MATH500) | `applications/sensitivity_math500.py` | `data/processed/sensitivity_math500.parquet` |
 | Appendix F generation protocol | `data_generation/generate_responses.py` | post-processed matrices in `data/benchmarks/` |
 
 All publication-facing functions, scripts, labels, and retained-result filenames use the final
@@ -97,8 +97,8 @@ Application programs load the committed matrices from `data/benchmarks/` and wri
 outputs to `results/applications/`. For example:
 
 ```bash
-python applications/estimation_all.py
-python applications/prediction_all.py
+python applications/estimate_benchmarks.py
+python applications/predictive_power.py
 python applications/validity_math500.py
 ```
 

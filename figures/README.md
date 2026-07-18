@@ -6,5 +6,5 @@ notebooks refer to them directly. The current paper PDF in `paper/` is the autho
 for figure numbering and captions.
 
 The primary final-application assets are under `app_2/`; final supplementary simulation assets are
-under `sim_rev/`. Earlier variants remain available for provenance rather than being silently
-discarded.
+under `sim_rev/`. Application figures for experiments omitted from the current manuscript are not
+retained.

@@ -1,10 +1,8 @@
-import sys
-import os
+"""Reproduce Section 7.2.2 adaptive item efficiency on the three benchmarks."""
+
 import numpy as np
 import pandas as pd
 import multiprocess as mp
-from tqdm import tqdm
-import itertools
 from pathlib import Path
 from scipy.stats import norm
 from scipy.optimize import minimize
@@ -13,20 +11,18 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / 'data' / 'benchmarks'
 PROCESSED_DIR = REPO_ROOT / 'data' / 'processed'
 OUTPUT_DIR = REPO_ROOT / 'results' / 'applications'
-binary_df_math500 = pd.read_csv(DATA_DIR / 'correctness_matrix_math500.csv', index_col=0)
-cot_df_math500 = pd.read_csv(DATA_DIR / 'cot_length_matrix_math500.csv', index_col=0)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+binary_df = pd.read_csv(DATA_DIR / 'correctness_matrix_combined.csv', index_col=0)
+cot_df = pd.read_csv(DATA_DIR / 'cot_length_matrix_combined.csv', index_col=0)
 
-estimated_parameters = pd.read_parquet(PROCESSED_DIR / "estimated_parameters_math500_pred(1).parquet")
-a_joint = estimated_parameters['a_joint'].iloc[0]
-b_joint = estimated_parameters['b_joint'].iloc[0]
-omega_joint = estimated_parameters['omega_joint'].iloc[0]
-phi_joint = estimated_parameters['phi_joint'].iloc[0]
-lam_joint = estimated_parameters['lam_joint'].iloc[0]
-rho_joint = estimated_parameters['rho_joint'].iloc[0]
-theta_irt = estimated_parameters['theta_irt'].iloc[0]
-a_irt = estimated_parameters['a_irt'].iloc[0]
-b_irt = estimated_parameters['b_irt'].iloc[0]
+estimated_parameters = np.load(PROCESSED_DIR / "rest3_pred_params.npz")
+a_joint = estimated_parameters['a_lart_train']
+b_joint = estimated_parameters['b_lart_train']
+omega_joint = estimated_parameters['omega_lart_train']
+phi_joint = estimated_parameters['phi_lart_train']
+lam_joint = estimated_parameters['lam_lart_train']
+rho_joint = estimated_parameters['rho_lart']
+a_irt = estimated_parameters['a_irt_train']
+b_irt = estimated_parameters['b_irt_train']
 
 from lart import update_indi_fixed_all # note that have to use log_T in this case
 
@@ -71,34 +67,8 @@ def update_indi_fixed_all_irt(theta_old, R, a, b, sigma2=1.0):
     theta_new = opt_res.x
     return theta_new
 
-## data preprocessing
-rows_to_delete = [
-    "meta_llama_Llama_3.2_1B_one_shot",
-    "meta_llama_Llama_3.2_1B_zero_shot",
-    "meta_llama_Meta_Llama_3_8B_one_shot",
-    "meta_llama_Meta_Llama_3_8B_zero_shot",
-    "microsoft_phi_4_one_shot",
-    "microsoft_phi_4_zero_shot",
-    'TinyLlama_TinyLlama_1.1B_Chat_v1.0_zero_shot',
-    'TinyLlama_TinyLlama_1.1B_Chat_v1.0_one_shot',
-    'google_gemma_3_1b_pt_one_shot',
-    'google_gemma_3_1b_pt_zero_shot',
-    'google_gemma_7b_it_one_shot',
-    'google_gemma_7b_it_zero_shot',
-    'google_vaultgemma_1b_one_shot',
-    'google_vaultgemma_1b_zero_shot',
-    'meta_llama_Llama_3.2_3B_one_shot',
-    'meta_llama_Llama_3.2_3B_zero_shot',
-    'openai_community_gpt2_one_shot',
-    'openai_community_gpt2_zero_shot'
-]
-
-binary_df_math500 = binary_df_math500.drop(rows_to_delete, errors='ignore')
-cot_df_math500 = cot_df_math500.drop(rows_to_delete, errors='ignore')
-
-binary_array = binary_df_math500.to_numpy()
-cot_array = cot_df_math500.to_numpy()
-cot_array += 1
+binary_array = binary_df.to_numpy()
+cot_array = cot_df.to_numpy(dtype=float) + 1.0
 
 N, J = binary_array.shape
 
@@ -234,7 +204,7 @@ def step_wise_evaluation_irt(R, a, b, num_items=10, n_steps=None):
 
 # --- Create Subarrays with Random Columns (Unchanged) ---
 np.random.seed(42)
-chosen_models = np.random.choice(range(N), 108, replace=False)
+chosen_models = np.random.choice(range(N), 100, replace=False)
 chosen_models_bool = np.zeros(N, dtype=bool)
 chosen_models_bool[chosen_models] = True
 
@@ -270,22 +240,13 @@ if __name__ == "__main__":
 
     print("Model fitting complete. Saving results...")
 
-    # 4. Save the estimated parameters into a single parquet file
-    # The arrays are wrapped in lists to be stored correctly in a DataFrame
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
-    OUTPUT_DIR / 'efficiency_math500.npz',
+    OUTPUT_DIR / 'efficiency_rest3.npz',
     rank_lart=rank_lart,
     rank_irt=rank_irt,
     theta_lart=theta_lart,
     theta_irt=theta_irt
     )
 
-    print("Results saved to 'efficiency_math500.npz'")
-    # results_df = pd.DataFrame({
-    #     'rank_lart': [rank_lart],
-    #     'rank_irt': [rank_irt]
-    # })
-
-    # results_df.to_parquet('efficiency_math500.parquet', index=False)
-    # print("Results saved to 'efficiency_math500.parquet'")
+    print("Results saved to 'efficiency_rest3.npz'")
