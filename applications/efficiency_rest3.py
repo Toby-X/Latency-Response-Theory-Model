@@ -159,13 +159,15 @@ def step_wise_evaluation_joint(R, T, a, b, omega, phi, lam, rho, num_items=10, n
         selected_items[np.arange(N), new_item_indices] = True
         for i in range(N):
             current_mask = selected_items[i, :]
-            theta[i], tau[i] = update_indi_fixed_all(
+            theta_i, tau_i = update_indi_fixed_all(
                 np.atleast_1d(theta[i]), np.atleast_1d(tau[i]),
                 R[i, current_mask].reshape(1, -1), log_T[i, current_mask].reshape(1, -1),
                 a[current_mask], b[current_mask],
                 omega[current_mask], phi[current_mask],
                 lam[current_mask], rho
             )
+            theta[i] = theta_i.item()
+            tau[i] = tau_i.item()
             # log_info = instance_log_fisher_info(a[~selected_items[i, :]], b[~selected_items[i, :]], theta[i])
             # item_index = np.argmax(log_info)
             # actual_item_index = np.arange(J)[~selected_items[i, :]][item_index]
@@ -213,10 +215,11 @@ def step_wise_evaluation_irt(R, a, b, num_items=10, n_steps=None):
         selected_items[np.arange(N), new_item_indices] = True
         for i in range(N):
             current_mask = selected_items[i, :]
-            theta[i]= update_indi_fixed_all_irt(
+            theta_i = update_indi_fixed_all_irt(
                 np.atleast_1d(theta[i]), R[i, current_mask].reshape(1, -1),
                 a[current_mask], b[current_mask], 1.0
             )
+            theta[i] = theta_i.item()
             # log_info = instance_log_fisher_info(a[~selected_items[i, :]], b[~selected_items[i, :]], theta[i])
             # item_index = np.argmax(log_info)
             # actual_item_index = np.arange(J)[~selected_items[i, :]][item_index]

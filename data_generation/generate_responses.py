@@ -6,9 +6,6 @@ import argparse
 import json
 from pathlib import Path
 
-from transformers import AutoTokenizer
-from vllm import LLM, SamplingParams
-
 
 ZERO_SHOT = """Solve the following math problem. Be clear and concise.
 Problem: "{problem}"
@@ -61,6 +58,14 @@ def main() -> None:
     parser.add_argument("--prompt", choices=("zero-shot", "one-shot"), default="zero-shot")
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
     args = parser.parse_args()
+
+    try:
+        from transformers import AutoTokenizer
+        from vllm import LLM, SamplingParams
+    except ImportError as exc:
+        raise SystemExit(
+            'Response generation requires the optional dependencies: pip install -e ".[generation]"'
+        ) from exc
 
     items = list(records(args.input))
     template = ZERO_SHOT if args.prompt == "zero-shot" else ONE_SHOT

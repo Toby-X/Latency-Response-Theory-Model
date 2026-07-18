@@ -26,3 +26,24 @@ The committed run uses five datasets with 40 models, 12 items, true
 RMSE is used for vector parameters and absolute error for `rho`, matching the
 paper's simulation metrics. This is a smoke-scale check rather than the full
 Monte Carlo study.
+
+## Repository-wide smoke test
+
+`smoke_test_repo.py` performs reduced, non-destructive execution checks across
+the package, every simulation program, every application program, both data
+generation utilities, the example, saved data artifacts, tests, and notebook
+code cells. Simulation and application fits use only two SAEM iterations and
+write temporary outputs.
+
+Install the simulation extra and run:
+
+```bash
+pip install -e ".[dev,simulation]"
+python validation/smoke_test_repo.py \
+  --working-dir /Users/zhiyuxu/Programmes/LLM_Eval
+```
+
+The vLLM inference pathway is reported separately because it requires a CUDA
+GPU and a downloaded model. Its import behavior, prompt/parser utilities, and
+command-line interface are tested on CPU. The committed report is
+`validation/results/repo_smoke_test.json`.

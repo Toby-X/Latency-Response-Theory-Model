@@ -55,6 +55,7 @@ notebooks/          output-free manuscript analysis notebooks
 figures/            retained figures generated during the final analysis
 paper/              current manuscript PDF
 tests/              lightweight API and data-generator checks
+validation/         working-code comparison and repository-wide smoke test
 ```
 
 ## Paper-to-repository map

@@ -1,4 +1,3 @@
-import sys
 import os
 import numpy as np
 import pandas as pd
@@ -7,15 +6,13 @@ from tqdm import tqdm
 import itertools
 from pathlib import Path
 
+from lart import irt_saem_full, lart_saem_full
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / 'data' / 'benchmarks'
 OUTPUT_DIR = REPO_ROOT / 'results' / 'applications'
 binary_df_math500 = pd.read_csv(DATA_DIR / 'correctness_matrix_math500.csv', index_col=0)
 cot_df_math500 = pd.read_csv(DATA_DIR / 'cot_length_matrix_math500.csv', index_col=0)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from lart import lart_saem_full, irt_saem_full
-
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
     "meta_llama_Llama_3.2_1B_zero_shot",
@@ -58,14 +55,15 @@ cot_subarrays = [cot_array[:, indices] for indices in random_index_chunks]
 
 # --- 1. Define a More Generic Worker Function ---
 # This worker now takes a tuple: (model_type, subarray_index)
-def run_model(task_info):
+def run_model(task_info, max_iter=100, seed=42):
     """Runs a single specified model on a single specified subarray."""
     model_type, i = task_info
     print(f"Starting task: {model_type} on subarray {i+1}/{num_subarrays}...")
 
     if model_type == 'LaRT':
         theta, tau, a, b, omega, phi, lam, rho, n_iter = lart_saem_full(
-            binary_subarrays[i], cot_subarrays[i], n_samples=1, seed=42
+            binary_subarrays[i], cot_subarrays[i], n_samples=1, seed=seed,
+            max_iter=max_iter
         )
         return {
             'model_type': 'LaRT', 'subarray': i, 'theta_joint': theta, 'tau_joint': tau,
@@ -74,7 +72,7 @@ def run_model(task_info):
         }
     elif model_type == 'IRT':
         theta, a, b, sigma2, n_iter = irt_saem_full(
-            binary_subarrays[i], n_samples=1, seed=42
+            binary_subarrays[i], n_samples=1, seed=seed, max_iter=max_iter
         )
         return {
             'model_type': 'IRT', 'subarray': i, 'theta_irt': theta, 'a_irt': a,

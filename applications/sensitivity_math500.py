@@ -1,10 +1,11 @@
-import sys
 import os
 import numpy as np
 import pandas as pd
 import multiprocess as mp
 from functools import partial
 from pathlib import Path
+
+from lart import irt_saem_full, lart_saem_full
 
 # --- Data Loading and Preprocessing (Unchanged) ---
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -14,10 +15,6 @@ OUTPUT_DIR = REPO_ROOT / 'results' / 'applications'
 binary_df_math500 = pd.read_csv(DATA_DIR / 'correctness_matrix_math500.csv', index_col=0)
 cot_df_math500 = pd.read_csv(DATA_DIR / 'cot_length_matrix_math500.csv', index_col=0)
 question_list = np.load(PROCESSED_DIR / 'question_list.npy')
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from lart import lart_saem_full, irt_saem_full
 
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
@@ -71,7 +68,7 @@ shuffle_indices = np.random.permutation(binary_array.shape[0])
 N, J = binary_array.shape
 
 # --- Main Execution Block for Parallel Processing ---
-def run_model_task(task_tuple, binary_data, cot_data):
+def run_model_task(task_tuple, binary_data, cot_data, max_iter=100, seed=42):
     """
     Runs a single model (LaRT or IRT) for a single N value.
     This function is designed to be parallelized by pool.map().
@@ -86,7 +83,7 @@ def run_model_task(task_tuple, binary_data, cot_data):
              omega_joint, phi_joint, lam_joint, rho_joint,
              n_iter_joint) = lart_saem_full(
                 binary_data[:N, :], cot_data[:N, :],
-                n_samples=1, seed=42
+                n_samples=1, seed=seed, max_iter=max_iter
             )
 
             # Return results as a dictionary
@@ -105,7 +102,7 @@ def run_model_task(task_tuple, binary_data, cot_data):
             (theta_irt, a_irt, b_irt,
              sigma2_irt, n_iter_irt) = irt_saem_full(
                 binary_data[:N, :],
-                n_samples=1, seed=42
+                n_samples=1, seed=seed, max_iter=max_iter
             )
 
             # Return results as a dictionary
