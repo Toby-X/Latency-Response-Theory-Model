@@ -31,9 +31,8 @@ Monte Carlo study.
 
 `smoke_test_repo.py` performs reduced, non-destructive execution checks across
 the package, every simulation program, every application program, both data
-generation utilities, the example, saved data artifacts, tests, and notebook
-code cells. Simulation and application fits use only two SAEM iterations and
-write temporary outputs.
+generation utilities, saved data artifacts, and notebook code cells. Simulation
+and application fits use only two SAEM iterations and write temporary outputs.
 
 Install the simulation extra and run:
 

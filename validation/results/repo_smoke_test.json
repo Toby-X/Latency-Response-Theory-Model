@@ -6,7 +6,7 @@
     "temporary_outputs_only": true
   },
   "counts": {
-    "passed": 27,
+    "passed": 25,
     "failed": 0,
     "skipped": 1
   },
@@ -15,197 +15,183 @@
       "name": "python-compilation",
       "scope": "repository",
       "status": "passed",
-      "seconds": 0.04206404200522229,
-      "detail": "compiled 29 Python files"
+      "seconds": 0.03525429096771404,
+      "detail": "compiled 27 Python files"
     },
     {
       "name": "notebook-code",
       "scope": "notebooks",
       "status": "passed",
-      "seconds": 0.019547542033251375,
+      "seconds": 0.01911670801928267,
       "detail": "parsed 2 notebooks and compiled 216 code cells"
     },
     {
       "name": "core-estimators",
       "scope": "src/lart",
       "status": "passed",
-      "seconds": 0.3343242080300115,
+      "seconds": 0.33218295901315287,
       "detail": "current LaRT, IRT, and traditional-SAEM fits completed"
     },
     {
       "name": "simulation:main_study",
       "scope": "simulations/main_study.py",
       "status": "passed",
-      "seconds": 0.6998524169903249,
+      "seconds": 0.6665340839535929,
       "detail": "reduced replicate returned 15 result fields"
     },
     {
       "name": "simulation:vary_sample_size",
       "scope": "simulations/vary_sample_size.py",
       "status": "passed",
-      "seconds": 0.23388808401068673,
+      "seconds": 0.21726962499087676,
       "detail": "reduced replicate returned 16 result fields"
     },
     {
       "name": "simulation:vary_test_length",
       "scope": "simulations/vary_test_length.py",
       "status": "passed",
-      "seconds": 0.22444708296097815,
+      "seconds": 0.2192725830245763,
       "detail": "reduced replicate returned 16 result fields"
     },
     {
       "name": "simulation:vary_correlation",
       "scope": "simulations/vary_correlation.py",
       "status": "passed",
-      "seconds": 0.20687095797620714,
+      "seconds": 0.1970802919822745,
       "detail": "reduced replicate returned 17 result fields"
     },
     {
       "name": "simulation:misspec_logistic_lognormal",
       "scope": "simulations/misspec_logistic_lognormal.py",
       "status": "passed",
-      "seconds": 0.22336816700408235,
+      "seconds": 0.2151178339845501,
       "detail": "reduced replicate returned 17 result fields"
     },
     {
       "name": "simulation:misspec_logistic_poisson",
       "scope": "simulations/misspec_logistic_poisson.py",
       "status": "passed",
-      "seconds": 0.6114180829608813,
+      "seconds": 0.5966761669842526,
       "detail": "reduced replicate returned 17 result fields"
     },
     {
       "name": "simulation:misspec_logistic_poisson_shifted",
       "scope": "simulations/misspec_logistic_poisson_shifted.py",
       "status": "passed",
-      "seconds": 0.9514545000274666,
+      "seconds": 0.9176045840140432,
       "detail": "reduced replicate returned 17 result fields"
     },
     {
       "name": "simulation:misspec_probit_poisson",
       "scope": "simulations/misspec_probit_poisson.py",
       "status": "passed",
-      "seconds": 0.9105715419864282,
+      "seconds": 0.8824764589662664,
       "detail": "reduced replicate returned 17 result fields"
     },
     {
       "name": "simulation:misspec_probit_poisson_shifted",
       "scope": "simulations/misspec_probit_poisson_shifted.py",
       "status": "passed",
-      "seconds": 0.7158316670102067,
+      "seconds": 0.7192448330461048,
       "detail": "reduced replicate returned 17 result fields"
     },
     {
       "name": "simulation:traditional_saem_comparison",
       "scope": "simulations/traditional_saem_comparison.py",
       "status": "passed",
-      "seconds": 0.9368145419866778,
+      "seconds": 0.9805079579818994,
       "detail": "reduced replicate returned 23 result fields"
     },
     {
       "name": "simulation:correct_logistic_lognormal",
       "scope": "simulations/correct_logistic_lognormal.py",
       "status": "passed",
-      "seconds": 0.12221125001087785,
+      "seconds": 0.19552912504877895,
       "detail": "reduced replicate returned 8 result fields"
     },
     {
       "name": "simulation-output",
       "scope": "simulations/_output.py",
       "status": "passed",
-      "seconds": 0.08771745901321992,
+      "seconds": 0.09410929103614762,
       "detail": "Parquet output helper completed a temporary round trip"
     },
     {
       "name": "application:estimate_benchmarks",
       "scope": "applications/estimate_benchmarks.py",
       "status": "passed",
-      "seconds": 0.27352895797230303,
+      "seconds": 0.2845619170111604,
       "detail": "loaded separate MATH500 matrix (140, 500); reduced fits completed"
     },
     {
       "name": "application:predictive_power",
       "scope": "applications/predictive_power.py",
       "status": "passed",
-      "seconds": 15.008693249954376,
+      "seconds": 15.17630062502576,
       "detail": "three-benchmark training fit and held-out item folds completed"
     },
     {
       "name": "application:item_efficiency",
       "scope": "applications/item_efficiency.py",
       "status": "passed",
-      "seconds": 0.030236208986025304,
+      "seconds": 0.030471834004856646,
       "detail": "adaptive item-selection paths completed on 4 models and 6 items"
     },
     {
       "name": "application:sensitivity_math500",
       "scope": "applications/sensitivity_math500.py",
       "status": "passed",
-      "seconds": 6.145993915968575,
+      "seconds": 6.299285291985143,
       "detail": "LaRT and IRT sensitivity workers completed"
     },
     {
       "name": "application:validity_math500",
       "scope": "applications/validity_math500.py",
       "status": "passed",
-      "seconds": 0.2794182919897139,
+      "seconds": 0.28538862499408424,
       "detail": "LaRT and IRT partition-validity workers completed"
     },
     {
       "name": "data-generation:matrix-builder",
       "scope": "data_generation/build_matrices.py",
       "status": "passed",
-      "seconds": 0.3696641249698587,
+      "seconds": 0.4025882499990985,
       "detail": "scored JSONL converted to temporary 2 x 2 LaRT matrices"
     },
     {
       "name": "data-generation:helpers",
       "scope": "data_generation/generate_responses.py",
       "status": "passed",
-      "seconds": 0.025763499957975,
+      "seconds": 0.025580582965631038,
       "detail": "prompt module imports without GPU packages; boxed-answer parser and CLI help passed"
     },
     {
       "name": "data-generation:gpu-inference",
       "scope": "data_generation/generate_responses.py",
       "status": "skipped",
-      "seconds": 1.0540999937802553e-05,
+      "seconds": 7.875030860304832e-06,
       "detail": "requires a CUDA GPU, a downloaded model, transformers, and vLLM"
-    },
-    {
-      "name": "example",
-      "scope": "examples/fit_synthetic.py",
-      "status": "passed",
-      "seconds": 0.6657946670311503,
-      "detail": "documented end-to-end example completed with two SAEM iterations"
     },
     {
       "name": "working-folder-comparison",
       "scope": "validation/compare_working_folder.py",
       "status": "passed",
-      "seconds": 0.9062165839713998,
+      "seconds": 1.0782594159827568,
       "detail": "one paired current/working-folder comparison completed"
     },
     {
       "name": "data-artifacts",
       "scope": "data/ and results/",
       "status": "passed",
-      "seconds": 0.06028654094552621,
+      "seconds": 0.07153429195750505,
       "detail": "read 11 CSV, 14 Parquet, and 2 NPZ files"
     },
     {
       "name": "paper-application-artifacts",
       "scope": "data/processed/",
       "status": "passed",
-      "seconds": 0.005900749994907528,
+      "seconds": 0.006348625000100583,
       "detail": "Tables 1-2, validity variances, and predictive dimensions match the paper"
-    },
-    {
-      "name": "pytest",
-      "scope": "tests/",
-      "status": "passed",
-      "seconds": 0.6304518749821,
-      "detail": "3 passed in 0.45s"
     }
   ]
 }

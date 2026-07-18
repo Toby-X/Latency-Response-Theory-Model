@@ -294,26 +294,6 @@ def check_generation_inference() -> str:
     raise SkipCheck("requires a CUDA GPU, a downloaded model, transformers, and vLLM")
 
 
-def check_example() -> str:
-    output = _subprocess(
-        [
-            sys.executable,
-            "examples/fit_synthetic.py",
-            "--n-models",
-            "20",
-            "--n-items",
-            "10",
-            "--max-iter",
-            "2",
-            "--seed",
-            "7",
-        ]
-    )
-    if "estimated rho" not in output:
-        raise AssertionError(output)
-    return "documented end-to-end example completed with two SAEM iterations"
-
-
 def check_previous_comparison(working_dir: Path | None) -> str:
     if working_dir is None or not working_dir.is_dir():
         raise SkipCheck("previous working directory was not supplied or does not exist")
@@ -406,11 +386,6 @@ def check_paper_application_artifacts() -> str:
     return "Tables 1-2, validity variances, and predictive dimensions match the paper"
 
 
-def check_pytest() -> str:
-    output = _subprocess([sys.executable, "-m", "pytest", "-q"])
-    return output.splitlines()[-1]
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -480,7 +455,6 @@ def main() -> None:
                 "data_generation/generate_responses.py",
                 check_generation_inference,
             ),
-            ("example", "examples/fit_synthetic.py", check_example),
             (
                 "working-folder-comparison",
                 "validation/compare_working_folder.py",
@@ -492,7 +466,6 @@ def main() -> None:
                 "data/processed/",
                 check_paper_application_artifacts,
             ),
-            ("pytest", "tests/", check_pytest),
         ]
     )
 

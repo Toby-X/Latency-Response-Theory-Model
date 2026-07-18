@@ -9,9 +9,9 @@ LaRT jointly models whether an LLM answers an item correctly and how many Chain-
 (CoT) tokens it uses before the final answer. The joint model estimates latent mathematical
 ability, latent speed, item accuracy parameters, item latency parameters, and their correlation.
 
-This repository is organized around the current manuscript in `paper/LaRT-preprint.pdf`. It uses
-the actual research implementation and experiment files. The earlier AI-written repository summary
-is not used as a source of algorithmic code.
+This repository follows the structure of the current LaRT manuscript and uses the actual research
+implementation and experiment files. The earlier AI-written repository summary is not used as a
+source of algorithmic code.
 
 ## Quick start
 
@@ -21,7 +21,6 @@ cd Latency-Response-Theory-Model
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
-python examples/fit_synthetic.py
 ```
 
 The concise public API validates its inputs and returns named results:
@@ -52,9 +51,6 @@ data/processed/    saved fits and experiment outputs used in the paper
 results/            retained Monte Carlo results used by the final plots
 data_generation/   sample vLLM generation and matrix-building workflow
 notebooks/          output-free manuscript analysis notebooks
-figures/            retained figures generated during the final analysis
-paper/              current manuscript PDF
-tests/              lightweight API and data-generator checks
 validation/         working-code comparison and repository-wide smoke test
 ```
 
@@ -119,8 +115,8 @@ scored JSONL records to LaRT matrices.
 - The estimator is a probit/log-normal joint model; the IRT comparison is normal-ogive IRT.
 - The public API is a thin validation layer over the reference `lart_saem_full` and
   `irt_saem_full` routines.
-- Output-free notebooks are included for provenance. Their saved inputs and figures are versioned,
-  but the clean programs in `simulations/` and `applications/` are the preferred entry points.
+- Output-free notebooks are included for provenance; the clean programs in `simulations/` and
+  `applications/` are the preferred entry points.
 
 ## Citation and license
 
