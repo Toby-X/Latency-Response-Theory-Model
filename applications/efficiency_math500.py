@@ -28,7 +28,7 @@ theta_irt = estimated_parameters['theta_irt'].iloc[0]
 a_irt = estimated_parameters['a_irt'].iloc[0]
 b_irt = estimated_parameters['b_irt'].iloc[0]
 
-from cMIRT_EM_c import update_indi_fixed_all # note that have to use log_T in this case
+from lart import update_indi_fixed_all # note that have to use log_T in this case
 
 ## Function Needed for Updating IRT theta's
 def log_c_like(R, theta, a, b, sigma2):
@@ -240,10 +240,10 @@ chosen_models_bool[chosen_models] = True
 if __name__ == "__main__":
     # Create a flat list of all 10 tasks to run
     with mp.Pool(processes=2) as pool:
-        print("Starting cMIRT and MIRT model fitting in parallel...")
+        print("Starting LaRT and IRT model fitting in parallel...")
 
-        # 1. Submit the first task (cMIRT) to the pool
-        cmirt_result_async = pool.apply_async(
+        # 1. Submit the first task (LaRT) to the pool
+        lart_result_async = pool.apply_async(
             step_wise_evaluation_joint,
             args=(binary_array[~chosen_models_bool], cot_array[~chosen_models_bool],
                   a_joint, b_joint,
@@ -252,8 +252,8 @@ if __name__ == "__main__":
             kwds={'num_items': 10}
         )
 
-        # 2. Submit the second task (MIRT) to the pool
-        mirt_result_async = pool.apply_async(
+        # 2. Submit the second task (IRT) to the pool
+        irt_result_async = pool.apply_async(
             step_wise_evaluation_irt,
             args=(binary_array[~chosen_models_bool],
                   a_irt, b_irt),
@@ -262,8 +262,8 @@ if __name__ == "__main__":
 
         # 3. Wait for the results from both tasks
         print("Waiting for results...")
-        rank_cirt, theta_cirt = cmirt_result_async.get()
-        rank_irt, theta_irt = mirt_result_async.get()
+        rank_lart, theta_lart = lart_result_async.get()
+        rank_irt, theta_irt = irt_result_async.get()
 
     print("Model fitting complete. Saving results...")
 
@@ -272,15 +272,15 @@ if __name__ == "__main__":
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
     OUTPUT_DIR / 'efficiency_math500.npz',
-    rank_cirt=rank_cirt,
+    rank_lart=rank_lart,
     rank_irt=rank_irt,
-    theta_cirt=theta_cirt,
+    theta_lart=theta_lart,
     theta_irt=theta_irt
     )
 
     print("Results saved to 'efficiency_math500.npz'")
     # results_df = pd.DataFrame({
-    #     'rank_cirt': [rank_cirt],
+    #     'rank_lart': [rank_lart],
     #     'rank_irt': [rank_irt]
     # })
 

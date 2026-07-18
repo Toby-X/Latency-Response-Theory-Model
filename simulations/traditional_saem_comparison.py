@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import norm
-from cMIRT_EM_c_2 import cMIRT_SAEM_full, MIRT_SAEM_full, fisher_info_theta_c, fisher_info_theta_irt, post_samp_tau_theta, post_samp_theta
+from lart.traditional_saem import lart_saem_full, irt_saem_full, fisher_info_theta_lart, fisher_info_theta_irt, post_samp_tau_theta, post_samp_theta
 import pandas as pd
 import multiprocess as mp
 from tqdm import tqdm
@@ -62,8 +62,8 @@ def experiment_fn(seed, param_dict, esp=1e-4, max_iter=100):
         R, T, theta_true, tau_true, a_true, b_true, omega_true, phi_true, lam_true, Sigma_true = gen_data(N, J, seed+100)
 
         # Initialize results storage
-        theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, iter_jml = cMIRT_SAEM_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
-        theta_est_irt, a_est_irt, b_est_irt, sigma2_est_irt, iter_irt = MIRT_SAEM_full(R, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+        theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, iter_jml = lart_saem_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+        theta_est_irt, a_est_irt, b_est_irt, sigma2_est_irt, iter_irt = irt_saem_full(R, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
 
         rmse_theta = np.min([np.sqrt(np.mean((theta_est - theta_true) ** 2)), np.sqrt(np.mean((theta_est + theta_true) ** 2))])
         rmse_tau = np.min([np.sqrt(np.mean((tau_est - tau_true) ** 2)), np.sqrt(np.mean((tau_est + tau_true) ** 2))])
@@ -80,18 +80,18 @@ def experiment_fn(seed, param_dict, esp=1e-4, max_iter=100):
         # mae_sigma2_irt = np.min([np.mean(np.abs(sigma2_est_irt**2 - Sigma_true[0, 0])),np.mean(np.abs(sigma2_est_irt**2 + Sigma_true[0, 0]))])
 
         Sigma_est = np.array([[1., rho_est], [rho_est, 1.]])
-        fisher_info_c_est = fisher_info_theta_c(a_est, b_est, theta_est, Sigma_est)
+        fisher_info_lart_est = fisher_info_theta_lart(a_est, b_est, theta_est, Sigma_est)
         fisher_info_irt_est = fisher_info_theta_irt(a_est_irt, b_est_irt, theta_est_irt, sigma2_est_irt)
-        fisher_info_c_true = fisher_info_theta_c(a_true, b_true, theta_true, Sigma_true)
+        fisher_info_lart_true = fisher_info_theta_lart(a_true, b_true, theta_true, Sigma_true)
         fisher_info_irt_true = fisher_info_theta_irt(a_true, b_true, theta_true, Sigma_true[0, 0])
 
         theta_samples_irt = post_samp_theta(1000, R, a_est_irt, b_est_irt)
-        theta_samples_c, tau_samples_c = post_samp_tau_theta(1000, R, np.log(T), a_est, b_est, omega_est, phi_est, lam_est, rho_est)
+        theta_samples_lart, tau_samples_lart = post_samp_tau_theta(1000, R, np.log(T), a_est, b_est, omega_est, phi_est, lam_est, rho_est)
         sd_theta_samples_irt = np.std(theta_samples_irt, axis=1)
-        sd_theta_samples_c = np.std(theta_samples_c, axis=1)
+        sd_theta_samples_lart = np.std(theta_samples_lart, axis=1)
 
         quantile_diff_theta_samples_irt = np.percentile(theta_samples_irt, 97.5, axis=1) - np.percentile(theta_samples_irt, 2.5, axis=1)
-        quantile_diff_theta_samples_c = np.percentile(theta_samples_c, 97.5, axis=1) - np.percentile(theta_samples_c, 2.5, axis=1)
+        quantile_diff_theta_samples_lart = np.percentile(theta_samples_lart, 97.5, axis=1) - np.percentile(theta_samples_lart, 2.5, axis=1)
 
         return {
             'N': N,
@@ -109,14 +109,14 @@ def experiment_fn(seed, param_dict, esp=1e-4, max_iter=100):
             # 'mae_sigma2_irt': mae_sigma2_irt,
             'iter_jml': iter_jml,
             'iter_irt': iter_irt,
-            'fisher_info_c_est': fisher_info_c_est,
+            'fisher_info_lart_est': fisher_info_lart_est,
             'fisher_info_irt_est': fisher_info_irt_est,
-            'fisher_info_c_true': fisher_info_c_true,
+            'fisher_info_lart_true': fisher_info_lart_true,
             'fisher_info_irt_true': fisher_info_irt_true,
             'sd_theta_samples_irt': sd_theta_samples_irt,
-            'sd_theta_samples_c': sd_theta_samples_c,
+            'sd_theta_samples_lart': sd_theta_samples_lart,
             'len_theta_samples_irt': quantile_diff_theta_samples_irt,
-            'len_theta_samples_c': quantile_diff_theta_samples_c,
+            'len_theta_samples_lart': quantile_diff_theta_samples_lart,
             'seed': seed
         }
     except Exception as e:

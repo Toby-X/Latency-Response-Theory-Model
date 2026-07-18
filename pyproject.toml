@@ -39,7 +39,6 @@ Repository = "https://github.com/Toby-X/Latency-Response-Theory-Model"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["cMIRT_EM_c", "cMIRT_EM_c_2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

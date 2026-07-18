@@ -61,11 +61,11 @@ tests/              lightweight API and data-generator checks
 
 | Manuscript component | Code | Retained data/result |
 |---|---|---|
-| Section 6, Figs. 2-3 | `simulations/main_study.py`, `simulations/vary_sample_size.py` | `results/simulations/cMIRT_sim_cov_N*_2.parquet` |
-| Appendix E.1, Figs. S1-S2 | `simulations/misspec_logistic_poisson.py`, `simulations/correct_logistic_lognormal.py` | `results/simulations/cMIRT_misspec_logistic_poisson(1).parquet` |
-| Appendix E.2, Fig. S3 | `simulations/vary_correlation.py` | `results/simulations/cMIRT_sim_varyRho_N200_J50(1).parquet` |
-| Appendix E.2, Fig. S4 | `simulations/vary_test_length.py` | `results/simulations/cMIRT_sim_fixedN200_varyJ(1).parquet` |
-| Appendix E.3, Figs. S5-S6 | `simulations/traditional_saem_comparison.py`, `src/lart/traditional_saem.py` | `results/simulations/cMIRT_sim_con_5*.parquet` |
+| Section 6, Figs. 2-3 | `simulations/main_study.py`, `simulations/vary_sample_size.py` | `results/simulations/LaRT_sim_cov_N*_2.parquet` |
+| Appendix E.1, Figs. S1-S2 | `simulations/misspec_logistic_poisson.py`, `simulations/correct_logistic_lognormal.py` | `results/simulations/LaRT_misspec_logistic_poisson(1).parquet` |
+| Appendix E.2, Fig. S3 | `simulations/vary_correlation.py` | `results/simulations/LaRT_sim_varyRho_N200_J50(1).parquet` |
+| Appendix E.2, Fig. S4 | `simulations/vary_test_length.py` | `results/simulations/LaRT_sim_fixedN200_varyJ(1).parquet` |
+| Appendix E.3, Figs. S5-S6 | `simulations/traditional_saem_comparison.py`, `src/lart/traditional_saem.py` | `results/simulations/LaRT_sim_con_5*.parquet` |
 | Section 7.1 qualitative fits | `applications/estimation_all.py`, `applications/estimation_math500_all.py` | `data/processed/estimated_parameters_*.parquet` |
 | Section 7.2.1 predictive power | `applications/prediction_all.py` | `data/processed/rest3_pred_params.npz` |
 | Section 7.2.2 item efficiency | `applications/efficiency_rest3.py` | `data/processed/efficiency_rest3.npz` |
@@ -73,8 +73,8 @@ tests/              lightweight API and data-generator checks
 | Section 7.2.4 LLM efficiency | `applications/sensitivity_math500.py` | `data/processed/sensitivity_math500(1).parquet` |
 | Appendix F generation protocol | `data_generation/generate_responses.py` | post-processed matrices in `data/benchmarks/` |
 
-Historical result filenames use `cMIRT`/`MIRT`, names from development before the final LaRT/IRT
-terminology. They are deliberately retained to preserve the exact notebook references.
+All publication-facing functions, scripts, labels, and retained-result filenames use the final
+LaRT/IRT terminology.
 
 ## Reproducing simulations
 
@@ -116,8 +116,8 @@ scored JSONL records to LaRT matrices.
 
 - Paper experiments use seed 42 for the application splits and fixed seeds for Monte Carlo runs.
 - The estimator is a probit/log-normal joint model; the IRT comparison is normal-ogive IRT.
-- The public API is a thin validation layer. The underlying reference routines retain their
-  historical names so the original simulation/application code stays auditable.
+- The public API is a thin validation layer over the reference `lart_saem_full` and
+  `irt_saem_full` routines.
 - Output-free notebooks are included for provenance. Their saved inputs and figures are versioned,
   but the clean programs in `simulations/` and `applications/` are the preferred entry points.
 

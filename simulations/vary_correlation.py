@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import norm
-from cMIRT_EM_c import cMIRT_SAEM_full, MIRT_SAEM_full
+from lart import lart_saem_full, irt_saem_full
 import pandas as pd
 import multiprocess as mp
 from tqdm import tqdm
@@ -79,11 +79,11 @@ def experiment_fn(seed, param_dict, esp=1e-4, max_iter=100):
 
         # --- Fit LaRT ---
         theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, iter_jml = \
-            cMIRT_SAEM_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+            lart_saem_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
 
         # --- Fit IRT ---
         theta_est_irt, a_est_irt, b_est_irt, _sigma2_irt, iter_irt = \
-            MIRT_SAEM_full(R, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+            irt_saem_full(R, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
 
         return {
             'N':              N,
@@ -136,7 +136,7 @@ def run_experiment(param_grid, n_exp=200, n_cores=8):
     results    = [r for r in results if r is not None]
     results_df = pd.DataFrame(results)
 
-    out_file = save_results(results_df, f"cMIRT_sim_varyRho_N{N_FIXED}_J{J_FIXED}.parquet")
+    out_file = save_results(results_df, f"LaRT_sim_varyRho_N{N_FIXED}_J{J_FIXED}.parquet")
     print(f"Results saved to {out_file}")
     return results_df
 

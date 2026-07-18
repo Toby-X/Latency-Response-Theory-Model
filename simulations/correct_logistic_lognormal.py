@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm, spearmanr
 from scipy.special import expit          # logistic sigmoid
-from cMIRT_EM_c import cMIRT_SAEM_full
+from lart import lart_saem_full
 from girth import twopl_mml, ability_eap # Imported girth functions
 import pandas as pd
 import multiprocess as mp
@@ -91,7 +91,7 @@ def experiment_fn(seed, param_dict, esp=1e-4, max_iter=100):
 
         # --- Fit LaRT (probit-log-normal, singly misspecified on link) ---
         # theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, iter_jml = \
-        #     cMIRT_SAEM_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+        #     lart_saem_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
 
         # --- Fit IRT (logistic link using girth 2PL MML) ---
         # Note: girth expects the dataset in shape (n_items, n_persons), so we pass R.T
@@ -158,7 +158,7 @@ def run_experiment(param_grid, n_exp=200, n_cores=8):
     results    = [r for r in results if r is not None]
     results_df = pd.DataFrame(results)
 
-    out_file = save_results(results_df, "cMIRT_misspec_logistic_lognormal_real.parquet")
+    out_file = save_results(results_df, "LaRT_misspec_logistic_lognormal_real.parquet")
     print(f"Results saved to {out_file}")
     return results_df
 

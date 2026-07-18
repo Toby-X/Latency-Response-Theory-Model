@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import norm
-from cMIRT_EM_c import cMIRT_SAEM_full as LaRT_SAEM_full, MIRT_SAEM_full as IRT_SAEM_full
+from lart import irt_saem_full, lart_saem_full
 import pandas as pd
 import multiprocess as mp
 from tqdm import tqdm
@@ -57,8 +57,8 @@ def experiment_fn(seed, param_dict, esp=1e-4, max_iter=100):
         R, T, theta_true, tau_true, a_true, b_true, omega_true, phi_true, lam_true, Sigma_true = gen_data(N, J, seed=seed)
 
         # Initialize results storage
-        theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, iter_jml = LaRT_SAEM_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
-        theta_est_irt, a_est_irt, b_est_irt, _sigma2_irt, iter_irt = IRT_SAEM_full(R, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+        theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, iter_jml = lart_saem_full(R, T, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
+        theta_est_irt, a_est_irt, b_est_irt, _sigma2_irt, iter_irt = irt_saem_full(R, n_samples=C, eps=esp, max_iter=max_iter, seed=seed)
 
         rmse_theta = np.sqrt(np.mean((theta_est - theta_true) ** 2))
         rmse_tau = np.sqrt(np.mean((tau_est - tau_true) ** 2))

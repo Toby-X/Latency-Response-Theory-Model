@@ -14,7 +14,7 @@ cot_df_math500 = pd.read_csv(DATA_DIR / 'cot_length_matrix_math500.csv', index_c
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from cMIRT_EM_c import cMIRT_SAEM_full, MIRT_SAEM_full
+from lart import lart_saem_full, irt_saem_full
 
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
@@ -65,26 +65,26 @@ N, J = binary_array.shape
 if __name__ == "__main__":
     # Create a pool with 2 processes to run both models at the same time
     with mp.Pool(processes=2) as pool:
-        print("Starting cMIRT and MIRT model fitting in parallel...")
+        print("Starting LaRT and IRT model fitting in parallel...")
 
-        # 1. Submit the first task (cMIRT) to the pool
-        cmirt_result_async = pool.apply_async(
-            cMIRT_SAEM_full,
+        # 1. Submit the first task (LaRT) to the pool
+        lart_result_async = pool.apply_async(
+            lart_saem_full,
             args=(binary_array, cot_array),
             kwds={'n_samples': 1, 'seed': 42}
         )
 
-        # 2. Submit the second task (MIRT) to the pool
-        mirt_result_async = pool.apply_async(
-            MIRT_SAEM_full,
+        # 2. Submit the second task (IRT) to the pool
+        irt_result_async = pool.apply_async(
+            irt_saem_full,
             args=(binary_array,),
             kwds={'n_samples': 1, 'seed': 42}
         )
 
         # 3. Wait for the results from both tasks
         print("Waiting for results...")
-        theta_joint, tau_joint, a_joint, b_joint, omega_joint, phi_joint, lam_joint, rho_joint, n_iter_joint = cmirt_result_async.get()
-        theta_irt, a_irt, b_irt, sigma2_irt, n_iter_irt = mirt_result_async.get()
+        theta_joint, tau_joint, a_joint, b_joint, omega_joint, phi_joint, lam_joint, rho_joint, n_iter_joint = lart_result_async.get()
+        theta_irt, a_irt, b_irt, sigma2_irt, n_iter_irt = irt_result_async.get()
 
     print("Model fitting complete. Saving results...")
 

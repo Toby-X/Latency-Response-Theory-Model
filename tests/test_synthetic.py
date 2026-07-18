@@ -1,7 +1,14 @@
 import numpy as np
 import pytest
 
+import lart
 from lart import fit_lart, generate_lart_data
+
+
+def test_public_method_uses_lart_name():
+    assert hasattr(lart, "fit_lart")
+    assert hasattr(lart, "lart_saem_full")
+    assert not hasattr(lart, "cMIRT_SAEM_full")
 
 
 def test_generator_shapes_and_support():

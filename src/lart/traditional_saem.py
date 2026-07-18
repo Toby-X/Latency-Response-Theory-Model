@@ -32,7 +32,7 @@ def log_complete_likelihood(R, log_T, theta, tau, a, b, omega, phi, lam, rho):
 
     return log_like
 
-def cMIRT_spectral(R, T):
+def lart_spectral(R, T):
     N, J = R.shape
     eps = 1e-9
     log_T = np.log(T + eps)
@@ -426,7 +426,7 @@ def update_indi_fixed_all(theta_old, tau_old, R, log_T, a, b, omega, phi, lam, r
     tau_new = indi_params_new[N:]
     return theta_new, tau_new
 
-def cMIRT_SAEM(R, T, n_samples=1, weight_scheme_fn = None, initial_params = None, n_burn=60, eps = 1e-4, max_iter=100, seed=None):
+def lart_saem(R, T, n_samples=1, weight_scheme_fn = None, initial_params = None, n_burn=60, eps = 1e-4, max_iter=100, seed=None):
     log_T = np.log(T)
 
     if weight_scheme_fn is None:
@@ -440,7 +440,7 @@ def cMIRT_SAEM(R, T, n_samples=1, weight_scheme_fn = None, initial_params = None
         lam_init = initial_params["lam"]
         rho_init = initial_params["rho"]
     else:
-        theta_init, tau_init, a_init, b_init, omega_init, phi_init, lam_init, rho_init = cMIRT_spectral(R, T)
+        theta_init, tau_init, a_init, b_init, omega_init, phi_init, lam_init, rho_init = lart_spectral(R, T)
 
     n_iter = 1
     # current_n_samples = min(20, n_samples)
@@ -489,9 +489,9 @@ def cMIRT_SAEM(R, T, n_samples=1, weight_scheme_fn = None, initial_params = None
 
     return a, b, omega, phi, lam, rho, n_iter
 
-def cMIRT_SAEM_full(R, T, n_samples=1, weight_scheme_fn = None, initial_params = None, eps = 1e-4, max_iter=100, seed=None, n_burn=20):
+def lart_saem_full(R, T, n_samples=1, weight_scheme_fn = None, initial_params = None, eps = 1e-4, max_iter=100, seed=None, n_burn=20):
     if initial_params is None:
-        theta_init, tau_init, a_init, b_init, omega_init, phi_init, lam_init, rho_init = cMIRT_spectral(R, T)
+        theta_init, tau_init, a_init, b_init, omega_init, phi_init, lam_init, rho_init = lart_spectral(R, T)
         initial_params = {
             "theta": theta_init,
             "tau": tau_init,
@@ -506,12 +506,12 @@ def cMIRT_SAEM_full(R, T, n_samples=1, weight_scheme_fn = None, initial_params =
         theta_init = initial_params["theta"]
         tau_init = initial_params["tau"]
 
-    a_est, b_est, omega_est, phi_est, lam_est, rho_est, n_iter = cMIRT_SAEM(R, T, n_samples, weight_scheme_fn, initial_params, n_burn, eps, max_iter, seed=seed)
+    a_est, b_est, omega_est, phi_est, lam_est, rho_est, n_iter = lart_saem(R, T, n_samples, weight_scheme_fn, initial_params, n_burn, eps, max_iter, seed=seed)
     theta_est, tau_est = update_indi_fixed_all(theta_init, tau_init, R, np.log(T), a_est, b_est, omega_est, phi_est, lam_est, rho_est)
 
     return theta_est, tau_est, a_est, b_est, omega_est, phi_est, lam_est, rho_est, n_iter
 
-def MIRT_spectral(R):
+def irt_spectral(R):
     N, J = R.shape
     eps = 1e-9
 
@@ -548,7 +548,7 @@ def MIRT_spectral(R):
 
     return theta_est, a_est, b_est, sigma2_est
 
-def MIRT_SAEM_full(R, n_samples = 10, initial_params = None, weight_scheme_fn = None,
+def irt_saem_full(R, n_samples = 10, initial_params = None, weight_scheme_fn = None,
                    eps = 1e-4, max_iter=100, n_burn=20, seed=None):
     def log_c_like(R, theta, a, b, sigma2):
         N, J = R.shape
@@ -683,7 +683,7 @@ def MIRT_SAEM_full(R, n_samples = 10, initial_params = None, weight_scheme_fn = 
         b_init = initial_params["b"]
         sigma2_init = initial_params["sigma2"]
     else:
-        theta_init, a_init, b_init, sigma2_init = MIRT_spectral(R)
+        theta_init, a_init, b_init, sigma2_init = irt_spectral(R)
 
     if weight_scheme_fn is None:
         weight_scheme_fn = lambda iter: 1 / (iter)
@@ -746,7 +746,7 @@ def MIRT_SAEM_full(R, n_samples = 10, initial_params = None, weight_scheme_fn = 
 
     return theta, a, b, sigma2, n_iter
 
-def fisher_info_theta_c(a, b, theta, Sigma):
+def fisher_info_theta_lart(a, b, theta, Sigma):
     val = theta[:, np.newaxis] * a[np.newaxis, :] + b[np.newaxis, :]
     log_phi_2 = 2 * norm.logpdf(val)
     log_Phi_p = norm.logcdf(val)

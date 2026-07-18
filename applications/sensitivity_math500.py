@@ -17,7 +17,7 @@ question_list = np.load(PROCESSED_DIR / 'question_list.npy')
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from cMIRT_EM_c import cMIRT_SAEM_full, MIRT_SAEM_full
+from lart import lart_saem_full, irt_saem_full
 
 rows_to_delete = [
     "meta_llama_Llama_3.2_1B_one_shot",
@@ -73,18 +73,18 @@ N, J = binary_array.shape
 # --- Main Execution Block for Parallel Processing ---
 def run_model_task(task_tuple, binary_data, cot_data):
     """
-    Runs a single model (cMIRT or MIRT) for a single N value.
+    Runs a single model (LaRT or IRT) for a single N value.
     This function is designed to be parallelized by pool.map().
     """
     N, model_type = task_tuple
     print(f"Starting task: N={N}, model={model_type}")
 
     try:
-        if model_type == 'cMIRT':
-            # Run the cMIRT model
+        if model_type == 'LaRT':
+            # Run the LaRT model
             (theta_joint, tau_joint, a_joint, b_joint,
              omega_joint, phi_joint, lam_joint, rho_joint,
-             n_iter_joint) = cMIRT_SAEM_full(
+             n_iter_joint) = lart_saem_full(
                 binary_data[:N, :], cot_data[:N, :],
                 n_samples=1, seed=42
             )
@@ -92,7 +92,7 @@ def run_model_task(task_tuple, binary_data, cot_data):
             # Return results as a dictionary
             # Wrap arrays in a list for pyarrow compatibility
             return {
-                'N': N, 'model_type': 'cMIRT', 'status': 'success',
+                'N': N, 'model_type': 'LaRT', 'status': 'success',
                 'theta_joint': [theta_joint], 'tau_joint': [tau_joint],
                 'a_joint': [a_joint], 'b_joint': [b_joint],
                 'omega_joint': [omega_joint], 'phi_joint': [phi_joint],
@@ -100,17 +100,17 @@ def run_model_task(task_tuple, binary_data, cot_data):
                 'n_iter_joint': n_iter_joint
             }
 
-        elif model_type == 'MIRT':
-            # Run the MIRT model
+        elif model_type == 'IRT':
+            # Run the IRT model
             (theta_irt, a_irt, b_irt,
-             sigma2_irt, n_iter_irt) = MIRT_SAEM_full(
+             sigma2_irt, n_iter_irt) = irt_saem_full(
                 binary_data[:N, :],
                 n_samples=1, seed=42
             )
 
             # Return results as a dictionary
             return {
-                'N': N, 'model_type': 'MIRT', 'status': 'success',
+                'N': N, 'model_type': 'IRT', 'status': 'success',
                 'theta_irt': [theta_irt], 'a_irt': [a_irt],
                 'b_irt': [b_irt], 'sigma2_irt': [sigma2_irt],
                 'n_iter_irt': n_iter_irt
@@ -126,11 +126,11 @@ if __name__ == "__main__":
     # cot_array = pd.read_csv(...).to_numpy()
 
     N_values = [25, 50, 75, 100, 125]
-    model_types = ['cMIRT', 'MIRT']
+    model_types = ['LaRT', 'IRT']
     n_cores = int(os.getenv('SLURM_CPUS_PER_TASK', 8))
 
     # 1. Create the full list of tasks
-    # This will be [(25, 'cMIRT'), (25, 'MIRT'), (50, 'cMIRT'), ...]
+    # This will be [(25, 'LaRT'), (25, 'IRT'), (50, 'LaRT'), ...]
     tasks_list = [(N, model) for N in N_values for model in model_types]
 
     # 2. Create a "partial" worker function
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     print("All tasks complete. Processing results...")
 
     # 4. Process the list of dictionaries into a single DataFrame
-    # This merges the 'cMIRT' and 'MIRT' results into a single row for each N
+    # This merges the 'LaRT' and 'IRT' results into a single row for each N
     merged_results = {}
     for res in all_results:
         if res['status'] == 'success':
@@ -157,7 +157,7 @@ if __name__ == "__main__":
             if N not in merged_results:
                 merged_results[N] = {'N': N} # Initialize a dict for this N
 
-            # Update the dict, merging keys from cMIRT and MIRT
+            # Update the dict, merging keys from LaRT and IRT
             merged_results[N].update(res)
 
     # Convert the merged dictionaries into a DataFrame

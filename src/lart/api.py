@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .estimation import MIRT_SAEM_full, cMIRT_SAEM_full
+from .estimation import irt_saem_full, lart_saem_full
 
 
 @dataclass(frozen=True)
@@ -48,7 +48,7 @@ def _response_matrix(response: ArrayLike) -> NDArray[np.float64]:
 def fit_lart(response: ArrayLike, latency: ArrayLike, **kwargs) -> LaRTResult:
     """Fit LaRT to binary responses and strictly positive CoT token counts.
 
-    Parameters are passed through to the reference ``cMIRT_SAEM_full`` routine;
+    Parameters are passed through to the reference ``lart_saem_full`` routine;
     useful reproducibility options include ``seed``, ``n_samples``, ``eps``, and
     ``max_iter``.
     """
@@ -60,12 +60,12 @@ def fit_lart(response: ArrayLike, latency: ArrayLike, **kwargs) -> LaRTResult:
     if not np.isfinite(latency_array).all() or np.any(latency_array <= 0):
         raise ValueError("latency must contain only finite, strictly positive values")
 
-    values = cMIRT_SAEM_full(response_array, latency_array, **kwargs)
+    values = lart_saem_full(response_array, latency_array, **kwargs)
     return LaRTResult(*values)
 
 
 def fit_irt(response: ArrayLike, **kwargs) -> IRTResult:
     """Fit the paper's normal-ogive IRT baseline."""
 
-    values = MIRT_SAEM_full(_response_matrix(response), **kwargs)
+    values = irt_saem_full(_response_matrix(response), **kwargs)
     return IRTResult(*values)
