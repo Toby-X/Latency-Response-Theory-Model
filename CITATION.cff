@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the LaRT paper."
+title: "Latency-Response Theory Model"
+type: software
+version: 0.1.0
+date-released: 2026-07-18
+url: "https://github.com/Toby-X/Latency-Response-Theory-Model"
+authors:
+  - family-names: Xu
+    given-names: Zhiyu
+  - family-names: Liu
+    given-names: Jia
+  - family-names: Wang
+    given-names: Yixin
+  - family-names: Gu
+    given-names: Yuqi
+preferred-citation:
+  type: article
+  title: "Latency-Response Theory Model: Evaluating Large Language Models via Response Accuracy and Chain-of-Thought Length"
+  authors:
+    - family-names: Xu
+      given-names: Zhiyu
+    - family-names: Liu
+      given-names: Jia
+    - family-names: Wang
+      given-names: Yixin
+    - family-names: Gu
+      given-names: Yuqi
+  year: 2026

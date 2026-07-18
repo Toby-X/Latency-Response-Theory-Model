@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lart-model"
+version = "0.1.0"
+description = "Reference implementation of the Latency-Response Theory model"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Zhiyu Xu"},
+  {name = "Jia Liu"},
+  {name = "Yixin Wang"},
+  {name = "Yuqi Gu"},
+]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "multiprocess>=0.70",
+  "pyarrow>=14",
+  "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+generation = [
+  "datasets>=3",
+  "torch>=2.2",
+  "transformers>=4.45",
+  "vllm>=0.6",
+]
+simulation = ["girth"]
+
+[project.urls]
+Repository = "https://github.com/Toby-X/Latency-Response-Theory-Model"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["cMIRT_EM_c", "cMIRT_EM_c_2"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
